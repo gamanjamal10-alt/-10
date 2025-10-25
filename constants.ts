@@ -1,11 +1,11 @@
-import type { Stat, KpiData, Task, Alert, Animal } from './types';
+import type { Stat, KpiData, Task, Alert, Animal, FarmEvent } from './types';
 
-export const STATS_DATA: Stat[] = [
-    { title: 'إجمالي القطيع', value: '150 رأس', icon: 'pets' },
-    { title: 'حالات مرضية', value: '3 حالات', color: 'warning', icon: 'sick' },
-    { title: 'تنبيهات حرجة', value: '1 حالة', color: 'danger', icon: 'warning' },
-    { title: 'إنتاج الحليب اليومي', value: '2,500 لتر', icon: 'science' },
+export const STATS_DATA: Omit<Stat, 'value'>[] = [
+    { title: 'حالات مرضية', color: 'warning', icon: 'sick' },
+    { title: 'تنبيهات حرجة', color: 'danger', icon: 'warning' },
+    { title: 'إنتاج الحليب اليومي', icon: 'science' },
 ];
+
 
 export const KPI_DATA: KpiData = {
     'إنتاج الحليب': {
@@ -43,7 +43,8 @@ export const KPI_DATA: KpiData = {
 export const TASKS_DATA: Task[] = [
     { id: 1, title: 'تطعيم الأبقار دفعة #3', dueDate: 'اليوم، 10:00 صباحًا', priority: 'high', description: 'تطعيم 25 بقرة من الدفعة الثالثة باللقاح الرباعي.' },
     { id: 2, title: 'فحص دوري للمواليد الجدد', dueDate: 'غدًا، 9:00 صباحًا', priority: 'normal', description: 'فحص العلامات الحيوية ووزن المواليد الجدد في الحظيرة رقم 5.' },
-    { id: 3, title: 'صيانة نظام الري المحوري', dueDate: '25 يوليو، 2:00 ظهرًا', priority: 'normal' },
+    { id: 3, title: 'جز صوف الأغنام', dueDate: '28 يوليو، 8:00 صباحًا', priority: 'normal', completed: true },
+    { id: 4, title: 'صيانة نظام الري المحوري', dueDate: '25 يوليو، 2:00 ظهرًا', priority: 'normal' },
 ];
 
 export const ALERTS_DATA: Alert[] = [
@@ -52,9 +53,24 @@ export const ALERTS_DATA: Alert[] = [
     { title: 'البقرة #112 لم تأكل كعادتها', time: 'منذ ساعتين', icon: 'pets', type: 'warning' },
 ];
 
-export const HERD_DATA: Animal[] = [
-    { id: '112', name: 'لؤلؤة', breed: 'هولشتاين', age: 4, healthStatus: 'Under Observation', imageUrl: 'https://images.unsplash.com/photo-1570042707108-667677599142?q=80&w=2070&auto=format&fit=crop' },
-    { id: '115', name: 'نجمة', breed: 'هولشتاين', age: 5, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1549470947-3a6a11a8a2a3?q=80&w=1974&auto=format&fit=crop' },
-    { id: '118', name: 'سحابة', breed: 'جيرسي', age: 3, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1596733431227-882a1f1d9313?q=80&w=1964&auto=format&fit=crop' },
-    { id: '120', name: 'زمردة', breed: 'هولشتاين', age: 6, healthStatus: 'Sick', imageUrl: 'https://images.unsplash.com/photo-1527482797592-a63e0204618e?q=80&w=2070&auto=format&fit=crop' },
+const CATTLE_DATA: Animal[] = [
+    { id: '112', name: 'لؤلؤة', breed: 'هولشتاين', age: 4, healthStatus: 'Under Observation', imageUrl: 'https://images.unsplash.com/photo-1570042707108-667677599142?q=80&w=2070&auto=format&fit=crop', type: 'cattle' },
+    { id: '115', name: 'نجمة', breed: 'هولشتاين', age: 5, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1549470947-3a6a11a8a2a3?q=80&w=1974&auto=format&fit=crop', type: 'cattle' },
+    { id: '118', name: 'سحابة', breed: 'جيرسي', age: 3, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1596733431227-882a1f1d9313?q=80&w=1964&auto=format&fit=crop', type: 'cattle' },
+    { id: '120', name: 'زمردة', breed: 'هولشتاين', age: 6, healthStatus: 'Sick', imageUrl: 'https://images.unsplash.com/photo-1527482797592-a63e0204618e?q=80&w=2070&auto=format&fit=crop', type: 'cattle' },
+];
+
+const SHEEP_DATA: Animal[] = [
+    { id: 'S01', name: 'صوفي', breed: 'عسافي', age: 2, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1593463527599-a0364de015c9?q=80&w=1964&auto=format&fit=crop', type: 'sheep' },
+    { id: 'S02', name: 'بدر', breed: 'نجدي', age: 3, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1589928383350-1e51b11a985a?q=80&w=2070&auto=format&fit=crop', type: 'sheep' },
+];
+
+export const HERD_DATA: Animal[] = [...CATTLE_DATA, ...SHEEP_DATA];
+
+
+export const EVENTS_DATA: FarmEvent[] = [
+    { id: 1, animalId: '115', date: '15 يونيو 2024', type: 'birth', description: 'ولادة عجل ذكر بصحة جيدة.' },
+    { id: 2, animalId: '120', date: '20 يوليو 2024', type: 'vet_check', description: 'فحص بيطري، تم تشخيص حمى الحليب.' },
+    { id: 3, animalId: '120', date: '22 يوليو 2024', type: 'note', description: 'الحالة الصحية تتحسن بعد العلاج.' },
+    { id: 4, animalId: 'S01', date: '10 مايو 2024', type: 'birth', description: 'ولادة توأم من الحملان.' },
 ];

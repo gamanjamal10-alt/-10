@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react';
+
 export interface Stat {
     title: string;
     value: string;
     color?: 'warning' | 'danger';
-    icon: string;
+    icon: ReactNode;
 }
 
 export interface Kpi {
@@ -33,6 +35,8 @@ export interface Alert {
     type: 'warning' | 'danger';
 }
 
+export type AnimalType = 'cattle' | 'sheep';
+
 export interface Animal {
     id: string;
     name: string;
@@ -40,4 +44,13 @@ export interface Animal {
     age: number;
     healthStatus: 'Healthy' | 'Sick' | 'Under Observation';
     imageUrl: string;
+    type: AnimalType;
+}
+
+export interface FarmEvent {
+    id: number;
+    animalId: string;
+    date: string;
+    type: 'birth' | 'vet_check' | 'note';
+    description: string;
 }

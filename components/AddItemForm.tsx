@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import type { Task } from '../types';
 
-interface AddItemFormProps {
-    onAddTask: (task: Omit<Task, 'id' | 'priority'>) => void;
+interface AddTaskFormProps {
+    onAddTask: (task: Omit<Task, 'id' | 'priority' | 'completed'>) => void;
 }
 
-export const AddItemForm: React.FC<AddItemFormProps> = ({ onAddTask }) => {
+export const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask }) => {
     const [title, setTitle] = useState('');
     const [dueDate, setDueDate] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (title.trim() && dueDate.trim()) {
-            onAddTask({ title, dueDate });
+            onAddTask({ title, dueDate, completed: false });
             setTitle('');
             setDueDate('');
         }

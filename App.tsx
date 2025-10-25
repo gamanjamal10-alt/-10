@@ -7,10 +7,10 @@ import { TasksPage } from './pages/TasksPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { FloatingActionButton } from './components/FloatingActionButton';
 import { AssistantModal } from './components/AssistantModal';
-import { AddItemForm } from './components/AddItemForm';
+import { AddAnimalForm } from './components/AddAnimalForm';
 import { Modal } from './components/Modal';
-import type { Task, Alert, Animal } from './types';
-import { TASKS_DATA, ALERTS_DATA, HERD_DATA } from './constants';
+import type { Task, Alert, Animal, FarmEvent } from './types';
+import { TASKS_DATA, ALERTS_DATA, HERD_DATA, EVENTS_DATA } from './constants';
 
 // Custom hook to use localStorage
 const useLocalStorage = <T,>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] => {
@@ -39,18 +39,19 @@ const useLocalStorage = <T,>(key: string, initialValue: T): [T, React.Dispatch<R
 const App: React.FC = () => {
     const [activePage, setActivePage] = useState('لوحة القيادة');
     const [isAssistantModalOpen, setAssistantModalOpen] = useState(false);
-    const [isAddItemModalOpen, setAddItemModalOpen] = useState(false);
+    const [isAddAnimalModalOpen, setAddAnimalModalOpen] = useState(false);
 
     const [tasks, setTasks] = useLocalStorage<Task[]>('tasks', TASKS_DATA);
     const [alerts, setAlerts] = useLocalStorage<Alert[]>('alerts', ALERTS_DATA);
     const [herd, setHerd] = useLocalStorage<Animal[]>('herd', HERD_DATA);
+    const [events, setEvents] = useLocalStorage<FarmEvent[]>('events', EVENTS_DATA);
 
-    const handleAddTask = (newTask: Omit<Task, 'id' | 'priority' | 'completed'>) => {
-        setTasks(prevTasks => [
-            ...prevTasks,
-            { ...newTask, id: Date.now(), priority: 'normal', completed: false }
+    const handleAddAnimal = (newAnimal: Omit<Animal, 'id'>) => {
+        setHerd(prevHerd => [
+            ...prevHerd,
+            { ...newAnimal, id: `${newAnimal.type.charAt(0).toUpperCase()}${Date.now()}` }
         ]);
-        setAddItemModalOpen(false);
+        setAddAnimalModalOpen(false);
     };
 
     const handleToggleTask = (taskId: number) => {
@@ -68,19 +69,20 @@ const App: React.FC = () => {
             case 'لوحة القيادة':
                 return <DashboardPage 
                     tasks={tasks} 
-                    alerts={alerts} 
+                    alerts={alerts}
+                    herd={herd} 
                     onViewAllTasks={() => setActivePage('المهام')} 
                     onViewAllAlerts={() => alert('سيتم عرض جميع التنبيهات هنا قريبًا.')}
                     onToggleTask={handleToggleTask}
                 />;
             case 'القطيع':
-                return <HerdPage herd={herd} />;
+                return <HerdPage herd={herd} events={events} />;
             case 'المهام':
                 return <TasksPage tasks={tasks} onToggleTask={handleToggleTask} />;
             case 'التقارير':
                 return <ReportsPage tasks={tasks} herd={herd} />;
             default:
-                return <DashboardPage tasks={tasks} alerts={alerts} onViewAllTasks={() => setActivePage('المهام')} onToggleTask={handleToggleTask} />;
+                return <DashboardPage tasks={tasks} alerts={alerts} herd={herd} onViewAllTasks={() => setActivePage('المهام')} onToggleTask={handleToggleTask} />;
         }
     };
 
@@ -90,15 +92,15 @@ const App: React.FC = () => {
             <main className="pt-20 pb-24">
                 {renderPage()}
             </main>
-            <FloatingActionButton onClick={() => setAddItemModalOpen(true)} />
+            <FloatingActionButton onClick={() => setAddAnimalModalOpen(true)} />
             <BottomNavBar activeItem={activePage} onNavigate={setActivePage} />
             <AssistantModal 
                 isOpen={isAssistantModalOpen} 
                 onClose={() => setAssistantModalOpen(false)}
                 appData={allData}
              />
-             <Modal isOpen={isAddItemModalOpen} onClose={() => setAddItemModalOpen(false)} title="إضافة مهمة جديدة">
-                <AddItemForm onAddTask={handleAddTask} />
+             <Modal isOpen={isAddAnimalModalOpen} onClose={() => setAddAnimalModalOpen(false)} title="إضافة حيوان جديد">
+                <AddAnimalForm onAddAnimal={handleAddAnimal} />
              </Modal>
         </div>
     );

@@ -5,17 +5,18 @@ import { TaskList } from '../components/TaskList';
 import { AlertList } from '../components/AlertList';
 import { Modal } from '../components/Modal';
 import { STATS_DATA, KPI_DATA } from '../constants';
-import type { Task, Alert } from '../types';
+import type { Task, Alert, Animal } from '../types';
 
 interface DashboardPageProps {
     tasks: Task[];
     alerts: Alert[];
+    herd: Animal[];
     onViewAllTasks: () => void;
     onViewAllAlerts?: () => void;
     onToggleTask: (taskId: number) => void;
 }
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ tasks, alerts, onViewAllTasks, onViewAllAlerts, onToggleTask }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ tasks, alerts, herd, onViewAllTasks, onViewAllAlerts, onToggleTask }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Task | Alert | null>(null);
 
@@ -64,12 +65,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ tasks, alerts, onV
             );
         }
     };
+
+    const cattleCount = herd.filter(animal => animal.type === 'cattle').length;
+    const sheepCount = herd.filter(animal => animal.type === 'sheep').length;
+
+    const dynamicStats = [
+        { title: 'عدد الأبقار', value: `${cattleCount} رأس`, icon: 'pets' },
+        { title: 'عدد الأغنام', value: `${sheepCount} رأس`, icon: 'pets' },
+        ...STATS_DATA.map(s => ({...s, value: s.title === 'إنتاج الحليب اليومي' ? '2,500 لتر' : s.title === 'حالات مرضية' ? '3 حالات' : '1 حالة' }))
+    ];
     
     return (
         <div className="p-4 space-y-6">
             {/* Stats Section */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {STATS_DATA.map(stat => <StatCard key={stat.title} {...stat} />)}
+                {dynamicStats.map(stat => <StatCard key={stat.title} {...stat} />)}
             </div>
 
             {/* KPI Section */}
@@ -78,7 +88,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ tasks, alerts, onV
             {/* Tasks Section */}
             <TaskList 
                 title="المهام القادمة" 
-                tasks={tasks.slice(0, 3)} 
+                tasks={tasks.filter(t => !t.completed).slice(0, 3)} 
                 onTaskClick={handleItemClick} 
                 onViewAllClick={onViewAllTasks}
                 onToggleTask={onToggleTask} 
