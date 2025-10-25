@@ -74,8 +74,8 @@ export const KpiCard: React.FC<KpiCardProps> = ({ kpiData }) => {
                         <AreaChart data={activeKpi.data} margin={{ top: 5, right: 0, left: 0, bottom: 5 }}>
                             <defs>
                                 <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#6366F1" stopOpacity={0.2}/>
-                                    <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
+                                    <stop offset="5%" stopColor="#8D6E63" stopOpacity={0.2}/>
+                                    <stop offset="95%" stopColor="#8D6E63" stopOpacity={0}/>
                                 </linearGradient>
                             </defs>
                             <Tooltip 
@@ -88,7 +88,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({ kpiData }) => {
                                 itemStyle={{ color: '#E2E8F0' }}
                                 labelStyle={{ display: 'none' }}
                             />
-                            <Area type="monotone" dataKey="value" stroke="#6366F1" fill="url(#chartGradient)" strokeWidth={3} dot={false} />
+                            <Area type="monotone" dataKey="value" stroke="#8D6E63" fill="url(#chartGradient)" strokeWidth={3} dot={false} />
                         </AreaChart>
                    </ResponsiveContainer>
                 </div>

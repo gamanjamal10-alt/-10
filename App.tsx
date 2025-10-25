@@ -38,19 +38,33 @@ function App() {
     const stats: Stat[] = useMemo(() => {
         const sickCount = herd.filter(a => a.healthStatus === 'Sick').length;
         const criticalAlertsCount = alerts.filter(a => a.type === 'danger').length;
+        const dairyCows = herd.filter(animal => animal.type === 'cattle' && animal.subType === 'بقرة حلوب').length;
+        const milkProduction = dairyCows * 25;
         
-        return STATS_DATA.map(stat => {
-            if (stat.title === 'حالات مرضية') {
-                return { ...stat, value: sickCount.toString() };
-            }
-            if (stat.title === 'تنبيهات حرجة') {
-                return { ...stat, value: criticalAlertsCount.toString() };
-            }
-            if (stat.title === 'إنتاج الحليب اليومي') {
-                return { ...stat, value: '2,500 لتر' }; // Example value
-            }
-            return { ...stat, value: 'N/A' };
-        });
+        const cattleCount = herd.filter(animal => animal.type === 'cattle').length;
+        const sheepCount = herd.filter(animal => animal.type === 'sheep').length;
+
+
+        const baseStats = [
+             { title: 'عدد الأبقار', value: cattleCount.toString(), icon: 'pets' },
+             { title: 'عدد الأغنام', value: sheepCount.toString(), icon: 'pets' },
+        ];
+
+        return [
+            ...baseStats,
+            ...STATS_DATA.map(stat => {
+                if (stat.title === 'حالات مرضية') {
+                    return { ...stat, value: sickCount.toString() };
+                }
+                if (stat.title === 'تنبيهات حرجة') {
+                    return { ...stat, value: criticalAlertsCount.toString() };
+                }
+                if (stat.title === 'إنتاج الحليب اليومي') {
+                    return { ...stat, value: `${milkProduction.toLocaleString()} لتر` };
+                }
+                return { ...stat, value: 'N/A' };
+            })
+        ];
     }, [herd, alerts]);
 
     const handleToggleTask = (taskId: number) => {
