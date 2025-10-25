@@ -1,28 +1,27 @@
-
 import type { Stat, Task, Alert, KpiData } from './types';
 
 export const STATS_DATA: Stat[] = [
-    { title: 'Total Animals', value: '1,240' },
-    { title: 'Needs Attention', value: '15', color: 'warning' },
-    { title: 'Overdue Tasks', value: '3', color: 'danger' },
+    { title: 'إجمالي الحيوانات', value: '1,240' },
+    { title: 'يحتاج لعناية', value: '15', color: 'warning' },
+    { title: 'مهام متأخرة', value: '3', color: 'danger' },
 ];
 
 export const UPCOMING_TASKS: Task[] = [
-    { title: 'Vaccinate Group B', dueDate: 'Due: Tomorrow', priority: 'high' },
-    { title: 'Move to Pasture 4', dueDate: 'Due: Oct 28, 2023', priority: 'medium' },
-    { title: 'Breeding Appointment', dueDate: 'Due: Nov 02, 2023', priority: 'medium' },
+    { title: 'تلقيح المجموعة ب', dueDate: 'الموعد: غداً', priority: 'high' },
+    { title: 'الانتقال إلى المرعى ٤', dueDate: 'الموعد: ٢٨ أكتوبر ٢٠٢٣', priority: 'medium' },
+    { title: 'موعد التزاوج', dueDate: 'الموعد: ٢ نوفمبر ٢٠٢٣', priority: 'medium' },
 ];
 
 export const RECENT_ALERTS: Alert[] = [
-    { title: 'Cow #432: High Temperature', time: '2 hours ago', icon: 'local_fire_department', type: 'danger' },
-    { title: 'Bull #88: Geofence Breach', time: 'Yesterday', icon: 'location_off', type: 'warning' },
-    { title: 'Calf #719: Low Weight Gain', time: '3 days ago', icon: 'monitor_weight_loss', type: 'warning' },
+    { title: 'البقرة #٤٣٢: حرارة مرتفعة', time: 'قبل ساعتين', icon: 'local_fire_department', type: 'danger' },
+    { title: 'الثور #٨٨: خرق السياج الجغرافي', time: 'أمس', icon: 'location_off', type: 'warning' },
+    { title: 'العجل #٧١٩: زيادة وزن منخفضة', time: 'قبل ٣ أيام', icon: 'monitor_weight_loss', type: 'warning' },
 ];
 
 export const KPI_DATA: KpiData = {
-    'Milk Production': {
-        title: 'Milk Production Trends',
-        value: '30.5k L',
+    'إنتاج الحليب': {
+        title: 'اتجاهات إنتاج الحليب',
+        value: '30.5ألف لتر',
         trend: '+2.1%',
         trendDirection: 'up',
         data: [
@@ -33,9 +32,9 @@ export const KPI_DATA: KpiData = {
             { name: 'M', value: 129 }, { name: 'N', value: 25 }
         ],
     },
-    'Weight Gain': {
-        title: 'Weight Gain Trends',
-        value: '1.2 kg/day',
+    'زيادة الوزن': {
+        title: 'اتجاهات زيادة الوزن',
+        value: '1.2 كجم/يوم',
         trend: '+0.5%',
         trendDirection: 'up',
         data: [
@@ -46,8 +45,8 @@ export const KPI_DATA: KpiData = {
             { name: 'M', value: 95 }, { name: 'N', value: 100 }
         ],
     },
-    'Health Score': {
-        title: 'Health Score Trends',
+    'مؤشر الصحة': {
+        title: 'اتجاهات مؤشر الصحة',
         value: '92.7',
         trend: '-0.3%',
         trendDirection: 'down',

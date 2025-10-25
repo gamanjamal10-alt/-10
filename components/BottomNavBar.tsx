@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
 const navItems = [
-    { name: 'Dashboard', icon: 'dashboard' },
-    { name: 'Herd', icon: 'pets' },
-    { name: 'Tasks', icon: 'task_alt' },
-    { name: 'Reports', icon: 'analytics' },
+    { name: 'لوحة القيادة', icon: 'dashboard' },
+    { name: 'القطيع', icon: 'pets' },
+    { name: 'المهام', icon: 'task_alt' },
+    { name: 'التقارير', icon: 'analytics' },
 ];
 
 interface NavItemProps {
@@ -25,7 +25,7 @@ const NavItem: React.FC<NavItemProps> = ({ name, icon, isActive, onClick }) => {
 };
 
 export const BottomNavBar: React.FC = () => {
-    const [activeItem, setActiveItem] = useState('Dashboard');
+    const [activeItem, setActiveItem] = useState('لوحة القيادة');
 
     const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, name: string) => {
         e.preventDefault();

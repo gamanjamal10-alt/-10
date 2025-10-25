@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { LineChart, Line, AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
 import type { KpiData } from '../types';
@@ -38,7 +37,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({ kpiData }) => {
 
     return (
         <div className="flex flex-col gap-4 rounded-xl p-4 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark">
-            <h3 className="text-text-light-primary dark:text-dark-primary text-lg font-bold leading-tight tracking-[-0.015em]">Key Performance Indicators</h3>
+            <h3 className="text-text-light-primary dark:text-dark-primary text-lg font-bold leading-tight tracking-[-0.015em]">مؤشرات الأداء الرئيسية</h3>
 
             {/* Segmented Buttons */}
             <div className="flex">
@@ -60,7 +59,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({ kpiData }) => {
                     <p className="text-text-light-secondary dark:text-dark-secondary text-base font-medium leading-normal">{activeKpi.title}</p>
                     <p className="text-text-light-primary dark:text-dark-primary tracking-tight text-[32px] font-bold leading-tight truncate">{activeKpi.value}</p>
                     <div className="flex gap-2 items-center">
-                        <p className="text-text-light-secondary dark:text-dark-secondary text-sm font-normal leading-normal">Last 30 Days</p>
+                        <p className="text-text-light-secondary dark:text-dark-secondary text-sm font-normal leading-normal">آخر 30 يوم</p>
                         <div className={`flex items-center gap-1 ${trendColor}`}>
                             <span className="material-symbols-outlined text-base">
                                 {activeKpi.trendDirection === 'up' ? 'trending_up' : 'trending_down'}
