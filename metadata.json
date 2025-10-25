@@ -1,0 +1,5 @@
+{
+  "name": "Herd Management Dashboard",
+  "description": "A modern, responsive dashboard for managing livestock, tracking key performance indicators like milk production, animal health, and upcoming tasks.",
+  "requestFramePermissions": []
+}
