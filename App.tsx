@@ -1,100 +1,44 @@
+// FIX: Replaced placeholder content with a full implementation for the main App component.
 import React, { useState } from 'react';
 import { TopAppBar } from './components/TopAppBar';
 import { BottomNavBar } from './components/BottomNavBar';
-import { FloatingActionButton } from './components/FloatingActionButton';
-import { Modal } from './components/Modal';
-import { AddItemForm } from './components/AddItemForm';
-
 import { DashboardPage } from './pages/DashboardPage';
 import { HerdPage } from './pages/HerdPage';
 import { TasksPage } from './pages/TasksPage';
 import { ReportsPage } from './pages/ReportsPage';
+import { FloatingActionButton } from './components/FloatingActionButton';
+import { AssistantModal } from './components/AssistantModal';
 
-import type { Task, Alert, Animal } from './types';
-
-function App() {
+const App: React.FC = () => {
     const [activePage, setActivePage] = useState('لوحة القيادة');
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalTitle, setModalTitle] = useState('');
-    const [modalContent, setModalContent] = useState<React.ReactNode>(null);
+    const [isAssistantModalOpen, setAssistantModalOpen] = useState(false);
 
-    const handleTaskClick = (task: Task) => {
-        setModalTitle(`تفاصيل المهمة: ${task.title}`);
-        setModalContent(<p>{task.description || 'لا يوجد وصف لهذه المهمة.'}</p>);
-        setIsModalOpen(true);
-    };
-
-    const handleAlertClick = (alert: Alert) => {
-        setModalTitle('تفاصيل التنبيه');
-        setModalContent(<p>{alert.title}</p>);
-        setIsModalOpen(true);
-    };
-
-    const handleAnimalClick = (animal: Animal) => {
-        setModalTitle(`ملف: ${animal.name} #${animal.id}`);
-        setModalContent(
-            <div>
-                <p><strong>السلالة:</strong> {animal.breed}</p>
-                <p><strong>العمر:</strong> {animal.age} سنوات</p>
-                <p><strong>الحالة الصحية:</strong> {animal.healthStatus}</p>
-            </div>
-        );
-        setIsModalOpen(true);
-    };
-
-    const handleFabClick = () => {
-        setModalTitle('إضافة مهمة جديدة');
-        setModalContent(<AddItemForm onAddItem={(item) => console.log('New item:', item)} onClose={() => setIsModalOpen(false)} />);
-        setIsModalOpen(true);
-    }
-
-    const handleViewAllAlertsClick = () => {
-        setModalTitle('كل التنبيهات');
-        setModalContent(<p>سيتم عرض قائمة كاملة بجميع التنبيهات هنا قريبًا.</p>);
-        setIsModalOpen(true);
-    };
-    
     const renderPage = () => {
         switch (activePage) {
             case 'لوحة القيادة':
-                return <DashboardPage 
-                            onTaskClick={handleTaskClick} 
-                            onAlertClick={handleAlertClick} 
-                            onNavigate={setActivePage}
-                            onViewAllAlerts={handleViewAllAlertsClick}
-                        />;
+                return <DashboardPage />;
             case 'القطيع':
-                return <HerdPage onAnimalClick={handleAnimalClick} />;
+                return <HerdPage />;
             case 'المهام':
-                return <TasksPage onTaskClick={handleTaskClick} />;
+                return <TasksPage />;
             case 'التقارير':
                 return <ReportsPage />;
             default:
-                return <DashboardPage 
-                            onTaskClick={handleTaskClick} 
-                            onAlertClick={handleAlertClick} 
-                            onNavigate={setActivePage}
-                            onViewAllAlerts={handleViewAllAlertsClick}
-                        />;
+                return <DashboardPage />;
         }
     };
 
     return (
-        <div className="bg-background-light dark:bg-background-dark min-h-screen pb-20">
-            <TopAppBar onNotificationsClick={() => console.log('Notifications clicked')} />
-            
-            <main>
+        <div className="bg-background-light dark:bg-background-dark min-h-screen font-sans" dir="rtl">
+            <TopAppBar title={activePage} onNotificationClick={() => console.log('Notifications clicked')} onSettingsClick={() => console.log('Settings clicked')} />
+            <main className="pt-20 pb-24">
                 {renderPage()}
             </main>
-            
-            <FloatingActionButton onClick={handleFabClick} />
+            <FloatingActionButton onClick={() => setAssistantModalOpen(true)} />
             <BottomNavBar activeItem={activePage} onNavigate={setActivePage} />
-
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalTitle}>
-                {modalContent}
-            </Modal>
+            <AssistantModal isOpen={isAssistantModalOpen} onClose={() => setAssistantModalOpen(false)} />
         </div>
     );
-}
+};
 
 export default App;

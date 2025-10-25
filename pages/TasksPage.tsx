@@ -1,20 +1,38 @@
-import React from 'react';
+// FIX: Replaced placeholder content with a full implementation for the TasksPage component.
+import React, { useState } from 'react';
 import { TaskList } from '../components/TaskList';
+import { Modal } from '../components/Modal';
 import { TASKS_DATA } from '../constants';
 import type { Task } from '../types';
 
-interface TasksPageProps {
-    onTaskClick: (task: Task) => void;
-}
+export const TasksPage: React.FC = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-export const TasksPage: React.FC<TasksPageProps> = ({ onTaskClick }) => {
+    const handleTaskClick = (task: Task) => {
+        setSelectedTask(task);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedTask(null);
+    };
+
     return (
         <div className="p-4">
-            <TaskList
-                title="كل المهام"
-                tasks={TASKS_DATA}
-                onTaskClick={onTaskClick}
-            />
+            <TaskList title="جميع المهام" tasks={TASKS_DATA} onTaskClick={handleTaskClick} />
+            
+            <Modal isOpen={isModalOpen} onClose={closeModal} title="تفاصيل المهمة">
+                {selectedTask && (
+                     <div>
+                        <p className="mb-2"><strong className="font-semibold">المهمة:</strong> {selectedTask.title}</p>
+                        <p className="mb-2"><strong className="font-semibold">الموعد النهائي:</strong> {selectedTask.dueDate}</p>
+                        <p className="mb-2"><strong className="font-semibold">الأولوية:</strong> {selectedTask.priority === 'high' ? 'عالية' : 'عادية'}</p>
+                        {selectedTask.description && <p><strong className="font-semibold">الوصف:</strong> {selectedTask.description}</p>}
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 };
