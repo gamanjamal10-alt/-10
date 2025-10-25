@@ -15,6 +15,8 @@ import { AssistantModal } from './components/AssistantModal';
 import { ImageEditorModal } from './components/ImageEditorModal';
 import { AddItemForm } from './components/AddItemForm';
 import { AddAnimalForm } from './components/AddAnimalForm';
+import { AlertList } from './components/AlertList';
+
 
 // Data and Types
 import { STATS_DATA, KPI_DATA, TASKS_DATA, ALERTS_DATA, HERD_DATA, EVENTS_DATA } from './constants';
@@ -33,6 +35,7 @@ function App() {
     const [addMode, setAddMode] = useState<'task' | 'animal'>('task');
     const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
     const [selectedAnimalForEdit, setSelectedAnimalForEdit] = useState<Animal | null>(null);
+    const [isAllAlertsModalOpen, setIsAllAlertsModalOpen] = useState(false);
 
     // Dynamic Stats Calculation
     const stats: Stat[] = useMemo(() => {
@@ -109,6 +112,14 @@ function App() {
         setIsImageEditorOpen(false);
     };
 
+    const handleViewAllTasks = () => {
+        setActivePage('المهام');
+    };
+
+    const handleViewAllAlerts = () => {
+        setIsAllAlertsModalOpen(true);
+    };
+
 
     const renderPage = () => {
         switch (activePage) {
@@ -127,6 +138,8 @@ function App() {
                         tasks={tasks}
                         alerts={alerts}
                         onToggleTask={handleToggleTask}
+                        onViewAllTasks={handleViewAllTasks}
+                        onViewAllAlerts={handleViewAllAlerts}
                     />
                 );
         }
@@ -171,6 +184,16 @@ function App() {
                 ) : (
                     <AddAnimalForm onAddAnimal={handleAddAnimal} />
                 )}
+            </Modal>
+            
+            <Modal isOpen={isAllAlertsModalOpen} onClose={() => setIsAllAlertsModalOpen(false)} title="جميع التنبيهات">
+                <div className="max-h-[60vh] overflow-y-auto">
+                    <AlertList
+                        title=""
+                        alerts={alerts}
+                        onAlertClick={() => {}} // Clicks do nothing in this overview list
+                    />
+                </div>
             </Modal>
         </div>
     );

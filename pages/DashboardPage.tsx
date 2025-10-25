@@ -12,9 +12,11 @@ interface DashboardPageProps {
     tasks: Task[];
     alerts: Alert[];
     onToggleTask: (taskId: number) => void;
+    onViewAllTasks: () => void;
+    onViewAllAlerts: () => void;
 }
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ stats, kpiData, tasks, alerts, onToggleTask }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ stats, kpiData, tasks, alerts, onToggleTask, onViewAllTasks, onViewAllAlerts }) => {
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
 
@@ -44,13 +46,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ stats, kpiData, ta
                     tasks={upcomingTasks}
                     onTaskClick={handleTaskClick}
                     onToggleTask={onToggleTask}
-                    onViewAllClick={() => alert('Navigate to all tasks page')} // Placeholder for navigation
+                    onViewAllClick={onViewAllTasks}
                 />
                 <AlertList
                     title="أحدث التنبيهات"
                     alerts={alerts}
                     onAlertClick={handleAlertClick}
-                    onViewAllClick={() => alert('Navigate to all alerts page')} // Placeholder for navigation
+                    onViewAllClick={onViewAllAlerts}
                 />
             </div>
 
