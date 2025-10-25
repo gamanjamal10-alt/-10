@@ -2,9 +2,10 @@ import React from 'react';
 import type { Alert } from '../types';
 
 interface AlertListProps {
+    title: string;
     alerts: Alert[];
     onAlertClick: (alert: Alert) => void;
-    onViewAllClick: () => void;
+    onViewAllClick?: () => void;
 }
 
 const AlertItem: React.FC<Alert & { onClick: () => void }> = ({ title, time, icon, type, onClick }) => {
@@ -23,12 +24,12 @@ const AlertItem: React.FC<Alert & { onClick: () => void }> = ({ title, time, ico
     );
 };
 
-export const AlertList: React.FC<AlertListProps> = ({ alerts, onAlertClick, onViewAllClick }) => {
+export const AlertList: React.FC<AlertListProps> = ({ title, alerts, onAlertClick, onViewAllClick }) => {
     return (
         <div className="flex flex-col gap-4 rounded-xl p-4 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark">
             <div className="flex justify-between items-center">
-                <h3 className="text-text-light-primary dark:text-dark-primary text-lg font-bold leading-tight tracking-[-0.015em]">التنبيهات الأخيرة</h3>
-                <a className="text-primary text-sm font-medium hover:underline cursor-pointer" onClick={onViewAllClick}>عرض الكل</a>
+                <h3 className="text-text-light-primary dark:text-dark-primary text-lg font-bold leading-tight tracking-[-0.015em]">{title}</h3>
+                {onViewAllClick && <a className="text-primary text-sm font-medium hover:underline cursor-pointer" onClick={onViewAllClick}>عرض الكل</a>}
             </div>
             <div className="flex flex-col gap-3">
                 {alerts.map((alert, index) => <AlertItem key={index} {...alert} onClick={() => onAlertClick(alert)} />)}

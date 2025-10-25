@@ -9,12 +9,11 @@ interface TasksPageProps {
 
 export const TasksPage: React.FC<TasksPageProps> = ({ onTaskClick }) => {
     return (
-        <div className="p-4 space-y-4">
-            <h2 className="text-text-light-primary dark:text-dark-primary text-xl font-bold">كل المهام</h2>
+        <div className="p-4">
             <TaskList
+                title="كل المهام"
                 tasks={TASKS_DATA}
                 onTaskClick={onTaskClick}
-                onViewAllClick={() => {}}
             />
         </div>
     );

@@ -9,9 +9,11 @@ import type { Task, Alert } from '../types';
 interface DashboardPageProps {
     onTaskClick: (task: Task) => void;
     onAlertClick: (alert: Alert) => void;
+    onNavigate: (page: string) => void;
+    onViewAllAlerts: () => void;
 }
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ onTaskClick, onAlertClick }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ onTaskClick, onAlertClick, onNavigate, onViewAllAlerts }) => {
     return (
         <div className="p-4 space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -23,15 +25,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onTaskClick, onAle
             <KpiCard kpiData={KPI_DATA} />
 
             <TaskList 
+                title="المهام القادمة"
                 tasks={TASKS_DATA.slice(0, 3)} 
                 onTaskClick={onTaskClick}
-                onViewAllClick={() => console.log('View all tasks clicked')}
+                onViewAllClick={() => onNavigate('المهام')}
             />
 
             <AlertList 
+                title="التنبيهات الأخيرة"
                 alerts={ALERTS_DATA} 
                 onAlertClick={onAlertClick}
-                onViewAllClick={() => console.log('View all alerts clicked')}
+                onViewAllClick={onViewAllAlerts}
             />
         </div>
     );

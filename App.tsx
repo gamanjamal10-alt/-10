@@ -47,11 +47,22 @@ function App() {
         setModalContent(<AddItemForm onAddItem={(item) => console.log('New item:', item)} onClose={() => setIsModalOpen(false)} />);
         setIsModalOpen(true);
     }
+
+    const handleViewAllAlertsClick = () => {
+        setModalTitle('كل التنبيهات');
+        setModalContent(<p>سيتم عرض قائمة كاملة بجميع التنبيهات هنا قريبًا.</p>);
+        setIsModalOpen(true);
+    };
     
     const renderPage = () => {
         switch (activePage) {
             case 'لوحة القيادة':
-                return <DashboardPage onTaskClick={handleTaskClick} onAlertClick={handleAlertClick} />;
+                return <DashboardPage 
+                            onTaskClick={handleTaskClick} 
+                            onAlertClick={handleAlertClick} 
+                            onNavigate={setActivePage}
+                            onViewAllAlerts={handleViewAllAlertsClick}
+                        />;
             case 'القطيع':
                 return <HerdPage onAnimalClick={handleAnimalClick} />;
             case 'المهام':
@@ -59,7 +70,12 @@ function App() {
             case 'التقارير':
                 return <ReportsPage />;
             default:
-                return <DashboardPage onTaskClick={handleTaskClick} onAlertClick={handleAlertClick} />;
+                return <DashboardPage 
+                            onTaskClick={handleTaskClick} 
+                            onAlertClick={handleAlertClick} 
+                            onNavigate={setActivePage}
+                            onViewAllAlerts={handleViewAllAlertsClick}
+                        />;
         }
     };
 
