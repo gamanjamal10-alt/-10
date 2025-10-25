@@ -1,21 +1,7 @@
-
 export interface Stat {
     title: string;
     value: string;
     color?: 'warning' | 'danger';
-}
-
-export interface Task {
-    title: string;
-    dueDate: string;
-    priority: 'high' | 'medium' | 'low';
-}
-
-export interface Alert {
-    title: string;
-    time: string;
-    icon: string;
-    type: 'danger' | 'warning';
 }
 
 export interface Kpi {
@@ -28,4 +14,29 @@ export interface Kpi {
 
 export interface KpiData {
     [key: string]: Kpi;
+}
+
+export interface Task {
+    id: number;
+    title: string;
+    dueDate: string;
+    priority: 'high' | 'normal';
+    completed?: boolean;
+    description?: string;
+}
+
+export interface Alert {
+    title: string;
+    time: string;
+    icon: string;
+    type: 'warning' | 'danger';
+}
+
+export interface Animal {
+    id: string;
+    name: string;
+    breed: string;
+    age: number;
+    healthStatus: 'Healthy' | 'Sick' | 'Under Observation';
+    imageUrl: string;
 }

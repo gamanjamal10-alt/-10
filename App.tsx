@@ -1,88 +1,84 @@
 import React, { useState } from 'react';
 import { TopAppBar } from './components/TopAppBar';
-import { FloatingActionButton } from './components/FloatingActionButton';
 import { BottomNavBar } from './components/BottomNavBar';
+import { FloatingActionButton } from './components/FloatingActionButton';
 import { Modal } from './components/Modal';
+import { AddItemForm } from './components/AddItemForm';
+
 import { DashboardPage } from './pages/DashboardPage';
 import { HerdPage } from './pages/HerdPage';
 import { TasksPage } from './pages/TasksPage';
 import { ReportsPage } from './pages/ReportsPage';
-import type { Task, Alert } from './types';
 
-const App: React.FC = () => {
-  const [modalContent, setModalContent] = useState<{ title: string; body: string } | null>(null);
-  const [activePage, setActivePage] = useState('لوحة القيادة');
+import type { Task, Alert, Animal } from './types';
 
-  const handleShowDetails = (item: Task | Alert) => {
-    setModalContent({
-        title: item.title,
-        body: `سيتم عرض تفاصيل "${item.title}" هنا.`
-    });
-  };
+function App() {
+    const [activePage, setActivePage] = useState('لوحة القيادة');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalContent, setModalContent] = useState<React.ReactNode>(null);
 
-  const handleViewAll = (type: 'Tasks' | 'Alerts') => {
-      const title = type === 'Tasks' ? 'كل المهام' : 'كل التنبيهات';
-      setModalContent({
-          title: title,
-          body: `سيتم عرض قائمة كاملة بـ ${title} هنا.`
-      });
-  };
+    const handleTaskClick = (task: Task) => {
+        setModalTitle(`تفاصيل المهمة: ${task.title}`);
+        setModalContent(<p>{task.description || 'لا يوجد وصف لهذه المهمة.'}</p>);
+        setIsModalOpen(true);
+    };
 
-  const handleFabClick = () => {
-      setModalContent({
-          title: 'إضافة عنصر جديد',
-          body: 'سيتم عرض نموذج لإضافة حيوان أو مهمة أو تنبيه جديد هنا.'
-      });
-  };
+    const handleAlertClick = (alert: Alert) => {
+        setModalTitle('تفاصيل التنبيه');
+        setModalContent(<p>{alert.title}</p>);
+        setIsModalOpen(true);
+    };
 
-  const handleNotificationsClick = () => {
-      setModalContent({
-          title: 'الإشعارات',
-          body: 'ليس لديك أي إشعارات جديدة.'
-      });
-  }
+    const handleAnimalClick = (animal: Animal) => {
+        setModalTitle(`ملف: ${animal.name} #${animal.id}`);
+        setModalContent(
+            <div>
+                <p><strong>السلالة:</strong> {animal.breed}</p>
+                <p><strong>العمر:</strong> {animal.age} سنوات</p>
+                <p><strong>الحالة الصحية:</strong> {animal.healthStatus}</p>
+            </div>
+        );
+        setIsModalOpen(true);
+    };
 
-  const closeModal = () => setModalContent(null);
-  
-  const renderPage = () => {
-    switch (activePage) {
-      case 'القطيع':
-        return <HerdPage />;
-      case 'المهام':
-        return <TasksPage />;
-      case 'التقارير':
-        return <ReportsPage />;
-      case 'لوحة القيادة':
-      default:
-        return <DashboardPage 
-                  onTaskClick={handleShowDetails}
-                  onAlertClick={handleShowDetails}
-                  onViewAllTasks={() => handleViewAll('Tasks')}
-                  onViewAllAlerts={() => handleViewAll('Alerts')}
-                />;
+    const handleFabClick = () => {
+        setModalTitle('إضافة مهمة جديدة');
+        setModalContent(<AddItemForm onAddItem={(item) => console.log('New item:', item)} onClose={() => setIsModalOpen(false)} />);
+        setIsModalOpen(true);
     }
-  };
+    
+    const renderPage = () => {
+        switch (activePage) {
+            case 'لوحة القيادة':
+                return <DashboardPage onTaskClick={handleTaskClick} onAlertClick={handleAlertClick} />;
+            case 'القطيع':
+                return <HerdPage onAnimalClick={handleAnimalClick} />;
+            case 'المهام':
+                return <TasksPage onTaskClick={handleTaskClick} />;
+            case 'التقارير':
+                return <ReportsPage />;
+            default:
+                return <DashboardPage onTaskClick={handleTaskClick} onAlertClick={handleAlertClick} />;
+        }
+    };
 
-  return (
-    <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden pb-24 bg-background-light dark:bg-background-dark">
-      <TopAppBar onNotificationsClick={handleNotificationsClick} />
-      
-      <main className="flex-1 flex flex-col">
-        {renderPage()}
-      </main>
+    return (
+        <div className="bg-background-light dark:bg-background-dark min-h-screen pb-20">
+            <TopAppBar onNotificationsClick={() => console.log('Notifications clicked')} />
+            
+            <main>
+                {renderPage()}
+            </main>
+            
+            <FloatingActionButton onClick={handleFabClick} />
+            <BottomNavBar activeItem={activePage} onNavigate={setActivePage} />
 
-      {activePage === 'لوحة القيادة' && <FloatingActionButton onClick={handleFabClick} />}
-      <BottomNavBar activeItem={activePage} onNavigate={setActivePage} />
-
-      <Modal 
-        isOpen={!!modalContent}
-        onClose={closeModal}
-        title={modalContent?.title || ''}
-      >
-        <p className="text-text-light-secondary dark:text-dark-secondary">{modalContent?.body}</p>
-      </Modal>
-    </div>
-  );
-};
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalTitle}>
+                {modalContent}
+            </Modal>
+        </div>
+    );
+}
 
 export default App;
