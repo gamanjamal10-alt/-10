@@ -30,9 +30,14 @@ export const AssistantModal: React.FC<AssistantModalProps> = ({ isOpen, onClose,
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     const generateContext = () => {
+        // Add completion status to tasks for better context
+        const tasksWithStatus = appData.tasks.map(({ id, title, dueDate, priority, completed }) => ({
+             id, title, dueDate, priority, completed: !!completed 
+        }));
+
         return `
         Here is the current farm data for "حضيرتي":
-        - Upcoming Tasks: ${JSON.stringify(appData.tasks)}
+        - Upcoming Tasks: ${JSON.stringify(tasksWithStatus)}
         - Recent Alerts: ${JSON.stringify(appData.alerts)}
         - Herd Status: ${JSON.stringify(appData.herd)}
         `;
@@ -43,7 +48,7 @@ export const AssistantModal: React.FC<AssistantModalProps> = ({ isOpen, onClose,
             chatRef.current = ai.chats.create({
                 model: 'gemini-2.5-flash',
                 config: {
-                    systemInstruction: 'أنت مساعد ذكاء اصطناعي خبير في تطبيق "حضيرتي" لإدارة مزارع الألبان الحديثة. دورك هو مساعدة مدير المزرعة في المهام والتحليلات والمعلومات المتعلقة بصحة القطيع وإنتاج الحليب والعمليات اليومية. قدم نصائح موجزة وعملية ومبنية على البيانات. يجب أن تكون جميع ردودك باللغة العربية.',
+                    systemInstruction: 'أنت مساعد ذكاء اصطناعي خبير في تطبيق "حضيرتي" لإدارة مزارع الألبان الحديثة. دورك هو مساعدة مدير المزرعة في المهام والتحليلات والمعلومات المتعلقة بصحة القطيع وإنتاج الحليب والعمليات اليومية. قدم نصائح موجزة وعملية ومبنية على البيانات. يجب أن تكون جميع ردودك باللغة العربية. كن على علم بأن المهام لديها خاصية "completed" والتي تعني أنها أنجزت.',
                 },
             });
             setHistory([]);
@@ -62,7 +67,7 @@ export const AssistantModal: React.FC<AssistantModalProps> = ({ isOpen, onClose,
         setError(null);
         try {
             const context = generateContext();
-            const summaryPrompt = "قدم لي ملخصًا صباحيًا موجزًا عن حالة المزرعة اليوم بناءً على هذه البيانات. سلط الضوء على أهم 3 نقاط تتطلب انتباهي.";
+            const summaryPrompt = "قدم لي ملخصًا صباحيًا موجزًا عن حالة المزرعة اليوم بناءً على هذه البيانات. سلط الضوء على أهم 3 نقاط تتطلب انتباهي، مع الأخذ في الاعتبار المهام المكتملة وغير المكتملة.";
             
             // This is a temporary chat session for the summary
             const summaryChat = ai.chats.create({ model: 'gemini-2.5-flash' });

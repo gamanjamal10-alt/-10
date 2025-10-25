@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TopAppBar } from './components/TopAppBar';
 import { BottomNavBar } from './components/BottomNavBar';
 import { DashboardPage } from './pages/DashboardPage';
@@ -12,21 +12,53 @@ import { Modal } from './components/Modal';
 import type { Task, Alert, Animal } from './types';
 import { TASKS_DATA, ALERTS_DATA, HERD_DATA } from './constants';
 
+// Custom hook to use localStorage
+const useLocalStorage = <T,>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] => {
+    const [storedValue, setStoredValue] = useState<T>(() => {
+        try {
+            const item = window.localStorage.getItem(key);
+            return item ? JSON.parse(item) : initialValue;
+        } catch (error) {
+            console.error(error);
+            return initialValue;
+        }
+    });
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(key, JSON.stringify(storedValue));
+        } catch (error) {
+            console.error(error);
+        }
+    }, [key, storedValue]);
+
+    return [storedValue, setStoredValue];
+};
+
+
 const App: React.FC = () => {
     const [activePage, setActivePage] = useState('لوحة القيادة');
     const [isAssistantModalOpen, setAssistantModalOpen] = useState(false);
     const [isAddItemModalOpen, setAddItemModalOpen] = useState(false);
 
-    const [tasks, setTasks] = useState<Task[]>(TASKS_DATA);
-    const [alerts, setAlerts] = useState<Alert[]>(ALERTS_DATA);
-    const [herd, setHerd] = useState<Animal[]>(HERD_DATA);
+    const [tasks, setTasks] = useLocalStorage<Task[]>('tasks', TASKS_DATA);
+    const [alerts, setAlerts] = useLocalStorage<Alert[]>('alerts', ALERTS_DATA);
+    const [herd, setHerd] = useLocalStorage<Animal[]>('herd', HERD_DATA);
 
-    const handleAddTask = (newTask: Omit<Task, 'id' | 'priority'>) => {
+    const handleAddTask = (newTask: Omit<Task, 'id' | 'priority' | 'completed'>) => {
         setTasks(prevTasks => [
             ...prevTasks,
-            { ...newTask, id: Date.now(), priority: 'normal' }
+            { ...newTask, id: Date.now(), priority: 'normal', completed: false }
         ]);
         setAddItemModalOpen(false);
+    };
+
+    const handleToggleTask = (taskId: number) => {
+        setTasks(prevTasks =>
+            prevTasks.map(task =>
+                task.id === taskId ? { ...task, completed: !task.completed } : task
+            )
+        );
     };
     
     const allData = { tasks, alerts, herd };
@@ -35,19 +67,20 @@ const App: React.FC = () => {
         switch (activePage) {
             case 'لوحة القيادة':
                 return <DashboardPage 
-                    tasks={tasks.slice(0, 3)} 
+                    tasks={tasks} 
                     alerts={alerts} 
                     onViewAllTasks={() => setActivePage('المهام')} 
                     onViewAllAlerts={() => alert('سيتم عرض جميع التنبيهات هنا قريبًا.')}
+                    onToggleTask={handleToggleTask}
                 />;
             case 'القطيع':
                 return <HerdPage herd={herd} />;
             case 'المهام':
-                return <TasksPage tasks={tasks} />;
+                return <TasksPage tasks={tasks} onToggleTask={handleToggleTask} />;
             case 'التقارير':
                 return <ReportsPage />;
             default:
-                return <DashboardPage tasks={tasks.slice(0, 3)} alerts={alerts} onViewAllTasks={() => setActivePage('المهام')} />;
+                return <DashboardPage tasks={tasks} alerts={alerts} onViewAllTasks={() => setActivePage('المهام')} onToggleTask={handleToggleTask} />;
         }
     };
 
@@ -64,7 +97,7 @@ const App: React.FC = () => {
                 onClose={() => setAssistantModalOpen(false)}
                 appData={allData}
              />
-             <Modal isOpen={isAddItemModalOpen} onClose={() => setAddItemModalOpen(false)} title="إضافة عنصر جديد">
+             <Modal isOpen={isAddItemModalOpen} onClose={() => setAddItemModalOpen(false)} title="إضافة مهمة جديدة">
                 <AddItemForm onAddTask={handleAddTask} />
              </Modal>
         </div>

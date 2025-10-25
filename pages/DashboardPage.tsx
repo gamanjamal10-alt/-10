@@ -12,9 +12,10 @@ interface DashboardPageProps {
     alerts: Alert[];
     onViewAllTasks: () => void;
     onViewAllAlerts?: () => void;
+    onToggleTask: (taskId: number) => void;
 }
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ tasks, alerts, onViewAllTasks, onViewAllAlerts }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ tasks, alerts, onViewAllTasks, onViewAllAlerts, onToggleTask }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Task | Alert | null>(null);
 
@@ -34,11 +35,23 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ tasks, alerts, onV
         if ('dueDate' in selectedItem) { // It's a Task
             const task = selectedItem as Task;
             return (
-                <div>
-                    <p className="mb-2"><strong className="font-semibold">المهمة:</strong> {task.title}</p>
-                    <p className="mb-2"><strong className="font-semibold">الموعد النهائي:</strong> {task.dueDate}</p>
-                    <p className="mb-2"><strong className="font-semibold">الأولوية:</strong> {task.priority === 'high' ? 'عالية' : 'عادية'}</p>
-                    {task.description && <p><strong className="font-semibold">الوصف:</strong> {task.description}</p>}
+                <div className="space-y-4">
+                    <div>
+                        <p className="mb-2"><strong className="font-semibold">المهمة:</strong> {task.title}</p>
+                        <p className="mb-2"><strong className="font-semibold">الموعد النهائي:</strong> {task.dueDate}</p>
+                        <p className="mb-2"><strong className="font-semibold">الأولوية:</strong> {task.priority === 'high' ? 'عالية' : 'عادية'}</p>
+                        <p className="mb-2"><strong className="font-semibold">الحالة:</strong> {task.completed ? 'مكتملة' : 'قيد التنفيذ'}</p>
+                        {task.description && <p><strong className="font-semibold">الوصف:</strong> {task.description}</p>}
+                    </div>
+                     <button 
+                        onClick={() => {
+                            onToggleTask(task.id);
+                            closeModal();
+                        }} 
+                        className="w-full px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors"
+                    >
+                        {task.completed ? 'وضع علامة كغير مكتملة' : 'وضع علامة كمكتملة'}
+                    </button>
                 </div>
             );
         } else { // It's an Alert
@@ -63,7 +76,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ tasks, alerts, onV
             <KpiCard kpiData={KPI_DATA} />
 
             {/* Tasks Section */}
-            <TaskList title="المهام القادمة" tasks={tasks} onTaskClick={handleItemClick} onViewAllClick={onViewAllTasks} />
+            <TaskList 
+                title="المهام القادمة" 
+                tasks={tasks.slice(0, 3)} 
+                onTaskClick={handleItemClick} 
+                onViewAllClick={onViewAllTasks}
+                onToggleTask={onToggleTask} 
+            />
 
             {/* Alerts Section */}
             <AlertList title="التنبيهات الأخيرة" alerts={alerts} onAlertClick={handleItemClick} onViewAllClick={onViewAllAlerts} />
