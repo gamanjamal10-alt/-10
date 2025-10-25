@@ -24,7 +24,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ tasks, herd }) => {
         { name: 'مكتملة', value: completedTasks },
         { name: 'قيد التنفيذ', value: pendingTasks },
     ];
-    const TASK_PIE_COLORS = ['#2E7D32', '#A5C2A5'];
+    const TASK_PIE_COLORS = ['#1976D2', '#A0AEC0'];
 
     // Herd Health Analytics Data
     const healthStatusCounts = herd.reduce((acc, animal) => {
@@ -78,7 +78,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ tasks, herd }) => {
                             <Legend />
                             <Bar dataKey="count" name="عدد الحيوانات" barSize={30}>
                                 {herdHealthData.map((entry, index) => {
-                                    const colorMap = { 'بصحة جيدة': '#2E7D32', 'تحت المراقبة': '#FFA000', 'مريضة': '#D32F2F' };
+                                    const colorMap = { 'بصحة جيدة': '#1976D2', 'تحت المراقبة': '#FFA000', 'مريضة': '#D32F2F' };
                                     return <Cell key={`cell-${index}`} fill={colorMap[entry.name as keyof typeof colorMap]} />;
                                 })}
                             </Bar>
