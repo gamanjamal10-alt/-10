@@ -1,4 +1,3 @@
-
 import type { Stat, KpiData, Task, Alert, Animal, FarmEvent, Shepherd } from './types';
 
 export const STATS_DATA: Stat[] = [
@@ -70,7 +69,7 @@ export const INITIAL_ALERTS: Alert[] = [
 
 export const INITIAL_HERD: Animal[] = [
     { id: '112', name: 'جميلة', type: 'cattle', subType: 'بقرة حلوب', breed: 'هولشتاين', age: 4, healthStatus: 'Under Observation', imageUrl: 'https://images.unsplash.com/photo-1570042707185-85b253b7d1e0?q=80&w=2070&auto=format&fit=crop' },
-    { id: '205', name: 'وردة', type: 'cattle', subType: 'بقرة حلوب', breed: 'هولشتاين', age: 5, healthStatus: 'Sick', imageUrl: 'https://images.unsplash.com/photo-1590396115272-3f1981509893?q=80&w=1974&auto=format&fit=crop' },
+    { id: '205', name: 'وردة', type: 'cattle', subType: 'بقرة حلوب', breed: 'هولشTAين', age: 5, healthStatus: 'Sick', imageUrl: 'https://images.unsplash.com/photo-1590396115272-3f1981509893?q=80&w=1974&auto=format&fit=crop' },
     { id: '301', name: 'سريعة', type: 'cattle', subType: 'عجل', breed: 'جيرسي', age: 0.5, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1554439121-17229559345c?q=80&w=2070&auto=format&fit=crop' },
     { id: 'S01', name: 'فلفل', type: 'sheep', subType: 'خروف', breed: 'عواسي', age: 2, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1588466585717-22073d7bc146?q=80&w=1983&auto=format&fit=crop' },
     { id: 'S02', name: 'قطنة', type: 'sheep', subType: 'سدسة', breed: 'نجدي', age: 3, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1524027734442-996b1b69a3b2?q=80&w=2070&auto=format&fit=crop' },
@@ -83,8 +82,4 @@ export const FARM_EVENTS: FarmEvent[] = [
     { id: 4, animalId: 'S01', date: '2024-06-15', description: 'تلقيح سنوي' },
 ];
 
-export const INITIAL_SHEPHERDS: Shepherd[] = [
-    { id: 1, name: 'د. خالد الأحمد', phone: '0501234567', specialty: 'طبيب بيطري - أبقار', imageUrl: 'https://i.pravatar.cc/150?u=khaled' },
-    { id: 2, name: 'سالم المحمد', phone: '0557654321', specialty: 'خبير تغذية', imageUrl: 'https://i.pravatar.cc/150?u=salem' },
-    { id: 3, name: 'مريم العلي', phone: '0539876543', specialty: 'طبيبة بيطرية - أغنام', imageUrl: 'https://i.pravatar.cc/150?u=mariam' },
-];
+export const INITIAL_SHEPHERDS: Shepherd[] = [];
