@@ -1,5 +1,5 @@
-
 export interface Stat {
+    id?: string;
     title: string;
     value: string;
     color?: 'warning' | 'danger';
@@ -57,11 +57,13 @@ export interface FarmEvent {
     description: string;
 }
 
+export type ShepherdSpecialty = 'الأبقار' | 'الأغنام' | 'الكل';
+
 export interface Shepherd {
     id: number;
     name: string;
     phone: string;
-    specialty: string;
+    specialty: ShepherdSpecialty;
     imageUrl: string;
 }
 

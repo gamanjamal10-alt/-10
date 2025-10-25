@@ -1,11 +1,19 @@
 import React from 'react';
 import type { Stat } from '../types';
 
-export const StatCard: React.FC<Stat> = ({ title, value, color, icon }) => {
+interface StatCardProps extends Stat {
+    onClick?: () => void;
+}
+
+export const StatCard: React.FC<StatCardProps> = ({ title, value, color, icon, onClick }) => {
     const valueColorClass = color === 'warning' ? 'text-warning' : color === 'danger' ? 'text-danger' : 'text-text-light-primary dark:text-dark-primary';
+    const isClickable = !!onClick;
 
     return (
-        <div className="flex flex-col gap-4 rounded-xl p-4 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark">
+        <div 
+            onClick={onClick}
+            className={`flex flex-col gap-4 rounded-xl p-4 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark ${isClickable ? 'cursor-pointer hover:border-primary/50 transition-all' : ''}`}
+        >
             <div className="flex items-center justify-center w-10 h-10 bg-primary/10 text-primary rounded-lg">
                 <span className="material-symbols-outlined">{icon}</span>
             </div>

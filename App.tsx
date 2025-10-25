@@ -10,6 +10,8 @@ import { AddAnimalForm } from './components/AddAnimalForm';
 import { AddShepherdForm } from './components/AddShepherdForm';
 import { AssistantModal } from './components/AssistantModal';
 import { ImageEditorModal } from './components/ImageEditorModal';
+import { EditStatModal } from './components/EditStatModal';
+
 
 // Pages
 import { DashboardPage } from './pages/DashboardPage';
@@ -19,8 +21,17 @@ import { ReportsPage } from './pages/ReportsPage';
 import { ShepherdsPage } from './pages/ShepherdsPage';
 
 // Data and Types
-import type { Page, Task, Animal, Alert, Shepherd } from './types';
-import { KPI_DATA, INITIAL_TASKS, INITIAL_ALERTS, INITIAL_HERD, FARM_EVENTS, INITIAL_SHEPHERDS } from './constants';
+import type { Page, Task, Animal, Alert, Shepherd, Stat } from './types';
+import { 
+    KPI_DATA, 
+    INITIAL_TASKS, 
+    INITIAL_ALERTS, 
+    INITIAL_HERD, 
+    FARM_EVENTS, 
+    INITIAL_SHEPHERDS,
+    INITIAL_MILK_PRODUCTION,
+    INITIAL_FODDER
+} from './constants';
 
 const App = () => {
     // State
@@ -29,33 +40,39 @@ const App = () => {
     const [herd, setHerd] = useState<Animal[]>(INITIAL_HERD);
     const [shepherds, setShepherds] = useState<Shepherd[]>(INITIAL_SHEPHERDS);
     
+    // Editable stats state
+    const [milkProduction, setMilkProduction] = useState(INITIAL_MILK_PRODUCTION);
+    const [availableFodder, setAvailableFodder] = useState(INITIAL_FODDER);
+    
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isAssistantModalOpen, setIsAssistantModalOpen] = useState(false);
     const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
     const [animalToEdit, setAnimalToEdit] = useState<Animal | null>(null);
+
+    // New modal state for editing stats
+    const [isEditStatModalOpen, setIsEditStatModalOpen] = useState(false);
+    const [statToEdit, setStatToEdit] = useState<Stat | null>(null);
 
     // Memos for derived data
     const alerts = useMemo(() => INITIAL_ALERTS, []);
     const kpiData = useMemo(() => KPI_DATA, []);
     const farmEvents = useMemo(() => FARM_EVENTS, []);
     
-    const dynamicStats = useMemo(() => {
+    const dynamicStats: Stat[] = useMemo(() => {
         const totalCattle = herd.filter(a => a.type === 'cattle').length;
         const totalSheep = herd.filter(a => a.type === 'sheep').length;
-        const milkingCows = herd.filter(a => a.subType === 'بقرة حلوب').length;
-        const milkProduction = milkingCows * 25;
         const healthyPercentage = herd.length > 0 ? Math.round((herd.filter(a => a.healthStatus === 'Healthy').length / herd.length) * 100) : 100;
         const activeAlerts = alerts.length;
 
         return [
-            { title: 'إجمالي الأبقار', value: totalCattle.toString(), icon: 'pets' },
-            { title: 'إجمالي الأغنام', value: totalSheep.toString(), icon: 'pets' },
-            { title: 'إنتاج الحليب (لتر/يوم)', value: milkProduction.toLocaleString(), icon: 'water_drop' },
-            { title: 'الحالة الصحية', value: `${healthyPercentage}% جيد`, icon: 'health_and_safety' },
-            { title: 'الأعلاف المتاحة (طن)', value: '12.5', icon: 'grass' },
-            { title: 'تنبيهات نشطة', value: activeAlerts.toString(), icon: 'notifications_active', color: 'warning' as 'warning' },
+            { id: 'cattle', title: 'إجمالي الأبقار', value: totalCattle.toString(), icon: 'pets' },
+            { id: 'sheep', title: 'إجمالي الأغنام', value: totalSheep.toString(), icon: 'pets' },
+            { id: 'milk', title: 'إنتاج الحليب (لتر/يوم)', value: milkProduction.toLocaleString(), icon: 'water_drop' },
+            { id: 'health', title: 'الحالة الصحية', value: `${healthyPercentage}% جيد`, icon: 'health_and_safety' },
+            { id: 'fodder', title: 'الأعلاف المتاحة (طن)', value: availableFodder.toString(), icon: 'grass' },
+            { id: 'alerts', title: 'تنبيهات نشطة', value: activeAlerts.toString(), icon: 'notifications_active', color: 'warning' as 'warning' },
         ];
-    }, [herd, alerts]);
+    }, [herd, alerts, milkProduction, availableFodder]);
 
     // Handlers
     const handleNavigation = (page: Page) => {
@@ -113,6 +130,25 @@ const App = () => {
         );
         setIsImageEditorOpen(false);
     };
+    
+    const handleOpenEditStatModal = (stat: Stat) => {
+        if (stat.id === 'milk' || stat.id === 'fodder') {
+            setStatToEdit(stat);
+            setIsEditStatModalOpen(true);
+        }
+    };
+    
+    const handleUpdateStat = (statId: string, newValue: string) => {
+        const numericValue = parseFloat(newValue);
+        if(isNaN(numericValue)) return;
+
+        if (statId === 'milk') {
+            setMilkProduction(numericValue);
+        } else if (statId === 'fodder') {
+            setAvailableFodder(numericValue);
+        }
+        setIsEditStatModalOpen(false);
+    };
 
     // Render logic
     const renderPage = () => {
@@ -126,6 +162,7 @@ const App = () => {
                     onToggleTask={handleToggleTask}
                     onViewAllTasks={() => setActivePage('tasks')}
                     onViewAllAlerts={() => { /* Can be implemented later */ }}
+                    onStatClick={handleOpenEditStatModal}
                 />;
             case 'herd':
                 return <HerdPage herd={herd} events={farmEvents} onEditImage={handleOpenImageEditor} />;
@@ -144,6 +181,7 @@ const App = () => {
                     onToggleTask={handleToggleTask}
                     onViewAllTasks={() => setActivePage('tasks')}
                     onViewAllAlerts={() => { /* Can be implemented later */ }}
+                    onStatClick={handleOpenEditStatModal}
                 />;
         }
     };
@@ -208,6 +246,14 @@ const App = () => {
                 onClose={() => setIsImageEditorOpen(false)}
                 animal={animalToEdit}
                 onUpdateAnimalImage={handleUpdateAnimalImage}
+            />
+            
+             {/* Edit Stat Modal */}
+            <EditStatModal
+                isOpen={isEditStatModalOpen}
+                onClose={() => setIsEditStatModalOpen(false)}
+                stat={statToEdit}
+                onUpdate={handleUpdateStat}
             />
         </div>
     );

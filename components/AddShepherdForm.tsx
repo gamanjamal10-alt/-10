@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import type { Shepherd } from '../types';
+import type { Shepherd, ShepherdSpecialty } from '../types';
 
 interface AddShepherdFormProps {
     onAddShepherd: (shepherd: Omit<Shepherd, 'id'>) => void;
@@ -9,11 +8,11 @@ interface AddShepherdFormProps {
 export const AddShepherdForm: React.FC<AddShepherdFormProps> = ({ onAddShepherd }) => {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
-    const [specialty, setSpecialty] = useState('');
+    const [specialty, setSpecialty] = useState<ShepherdSpecialty>('الأبقار'); // Default to first option
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (name.trim() && phone.trim() && specialty.trim()) {
+        if (name.trim() && phone.trim() && specialty) {
             onAddShepherd({ 
                 name, 
                 phone,
@@ -24,7 +23,7 @@ export const AddShepherdForm: React.FC<AddShepherdFormProps> = ({ onAddShepherd 
             // Reset form
             setName('');
             setPhone('');
-            setSpecialty('');
+            setSpecialty('الأبقار');
         }
     };
 
@@ -62,15 +61,17 @@ export const AddShepherdForm: React.FC<AddShepherdFormProps> = ({ onAddShepherd 
                 <label htmlFor="specialty" className="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-1">
                     التخصص
                 </label>
-                 <input
+                 <select
                     id="specialty"
-                    type="text"
                     value={specialty}
-                    onChange={(e) => setSpecialty(e.target.value)}
-                    className="w-full p-2 rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark"
-                    placeholder="مثال: طبيب بيطري"
+                    onChange={(e) => setSpecialty(e.target.value as ShepherdSpecialty)}
+                    className="w-full p-2 rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-primary focus:border-primary"
                     required
-                />
+                >
+                    <option value="الأبقار">الأبقار</option>
+                    <option value="الأغنام">الأغنام</option>
+                    <option value="الكل">الكل</option>
+                </select>
             </div>
             <div className="flex justify-end gap-2 pt-4">
                 <button type="submit" className="w-full px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors">

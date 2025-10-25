@@ -9,6 +9,10 @@ export const STATS_DATA: Stat[] = [
     { title: 'تنبيهات نشطة', value: '3', icon: 'notifications_active', color: 'warning' },
 ];
 
+export const INITIAL_MILK_PRODUCTION = 2450;
+export const INITIAL_FODDER = 12.5;
+
+
 export const KPI_DATA: KpiData = {
     'إنتاج الحليب': {
         title: 'متوسط إنتاج الحليب لكل بقرة حلوب',

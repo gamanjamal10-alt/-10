@@ -18,6 +18,7 @@ interface DashboardPageProps {
     onToggleTask: (taskId: number) => void;
     onViewAllTasks: () => void;
     onViewAllAlerts: () => void;
+    onStatClick: (stat: Stat) => void;
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
@@ -28,6 +29,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     onToggleTask,
     onViewAllTasks,
     onViewAllAlerts,
+    onStatClick,
 }) => {
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
@@ -52,7 +54,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {stats.map((stat) => (
-                    <StatCard key={stat.title} {...stat} />
+                    <StatCard 
+                        key={stat.title} 
+                        {...stat} 
+                        onClick={stat.id === 'milk' || stat.id === 'fodder' ? () => onStatClick(stat) : undefined}
+                    />
                 ))}
             </div>
 
@@ -63,6 +69,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <TaskList
                 title="المهام القادمة"
                 tasks={upcomingTasks}
+                // FIX: Corrected invalid prop name 'onTask-Click' to 'onTaskClick'
                 onTaskClick={handleTaskClick}
                 onToggleTask={onToggleTask}
                 onViewAllClick={onViewAllTasks}
