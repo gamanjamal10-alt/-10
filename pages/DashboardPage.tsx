@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
+
+// Components
 import { StatCard } from '../components/StatCard';
 import { KpiCard } from '../components/KpiCard';
 import { TaskList } from '../components/TaskList';
 import { AlertList } from '../components/AlertList';
 import { Modal } from '../components/Modal';
+
+// Data and Types
 import type { Stat, KpiData, Task, Alert } from '../types';
 
 interface DashboardPageProps {
@@ -16,61 +20,81 @@ interface DashboardPageProps {
     onViewAllAlerts: () => void;
 }
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ stats, kpiData, tasks, alerts, onToggleTask, onViewAllTasks, onViewAllAlerts }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({
+    stats,
+    kpiData,
+    tasks,
+    alerts,
+    onToggleTask,
+    onViewAllTasks,
+    onViewAllAlerts,
+}) => {
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-    const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
-    const upcomingTasks = tasks.filter(t => !t.completed).slice(0, 4);
-
-    const handleTaskClick = (task: Task) => setSelectedTask(task);
-    const handleAlertClick = (alert: Alert) => setSelectedAlert(alert);
-    const closeModal = () => {
-        setSelectedTask(null);
-        setSelectedAlert(null);
+    const handleTaskClick = (task: Task) => {
+        setSelectedTask(task);
+        setIsTaskModalOpen(true);
     };
 
+    const closeTaskModal = () => {
+        setIsTaskModalOpen(false);
+        setSelectedTask(null);
+    };
+
+    // Show only the first 4 upcoming tasks on the dashboard
+    const upcomingTasks = tasks.filter(t => !t.completed).slice(0, 4);
+    // Show only the first 3 alerts
+    const recentAlerts = alerts.slice(0, 3);
+
     return (
-        <div className="p-4 space-y-4">
-            {/* Stats */}
+        <div className="p-4 space-y-6">
+            {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {stats.map(stat => <StatCard key={stat.title} {...stat} />)}
+                {stats.map((stat) => (
+                    <StatCard key={stat.title} {...stat} />
+                ))}
             </div>
 
-            {/* KPIs */}
+            {/* KPI Card */}
             <KpiCard kpiData={kpiData} />
 
-            {/* Tasks & Alerts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <TaskList
-                    title="المهام القادمة"
-                    tasks={upcomingTasks}
-                    onTaskClick={handleTaskClick}
-                    onToggleTask={onToggleTask}
-                    onViewAllClick={onViewAllTasks}
-                />
-                <AlertList
-                    title="أحدث التنبيهات"
-                    alerts={alerts}
-                    onAlertClick={handleAlertClick}
-                    onViewAllClick={onViewAllAlerts}
-                />
-            </div>
+            {/* Tasks List */}
+            <TaskList
+                title="المهام القادمة"
+                tasks={upcomingTasks}
+                onTaskClick={handleTaskClick}
+                onToggleTask={onToggleTask}
+                onViewAllClick={onViewAllTasks}
+            />
 
-            {/* Modals for details */}
-            <Modal isOpen={!!selectedTask || !!selectedAlert} onClose={closeModal} title={selectedTask ? "تفاصيل المهمة" : "تفاصيل التنبيه"}>
+            {/* Alerts List */}
+            <AlertList
+                title="أحدث التنبيهات"
+                alerts={recentAlerts}
+                onAlertClick={(alert) => console.log('Alert clicked:', alert)} // Clicks do nothing on the dashboard preview
+                onViewAllClick={onViewAllAlerts}
+            />
+
+            {/* Task Details Modal */}
+            <Modal isOpen={isTaskModalOpen} onClose={closeTaskModal} title="تفاصيل المهمة">
                 {selectedTask && (
-                     <div className="space-y-4">
-                        <p><strong className="font-semibold">المهمة:</strong> {selectedTask.title}</p>
-                        <p><strong className="font-semibold">الموعد النهائي:</strong> {selectedTask.dueDate}</p>
-                        <p><strong className="font-semibold">الأولوية:</strong> {selectedTask.priority === 'high' ? 'عالية' : 'عادية'}</p>
-                         {selectedTask.description && <p><strong className="font-semibold">الوصف:</strong> {selectedTask.description}</p>}
-                    </div>
-                )}
-                {selectedAlert && (
-                     <div className="space-y-4">
-                        <p><strong className="font-semibold">التنبيه:</strong> {selectedAlert.title}</p>
-                        <p><strong className="font-semibold">الوقت:</strong> {selectedAlert.time}</p>
-                        <p><strong className="font-semibold">النوع:</strong> {selectedAlert.type === 'danger' ? 'خطر' : 'تحذير'}</p>
+                    <div className="space-y-4">
+                        <div>
+                            <p className="mb-2"><strong className="font-semibold">المهمة:</strong> {selectedTask.title}</p>
+                            <p className="mb-2"><strong className="font-semibold">الموعد النهائي:</strong> {selectedTask.dueDate}</p>
+                            <p className="mb-2"><strong className="font-semibold">الأولوية:</strong> {selectedTask.priority === 'high' ? 'عالية' : 'عادية'}</p>
+                             {selectedTask.description && <p><strong className="font-semibold">الوصف:</strong> {selectedTask.description}</p>}
+                        </div>
+                        <button 
+                            onClick={() => {
+                                onToggleTask(selectedTask.id);
+                                closeTaskModal();
+                            }} 
+                            className="w-full px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors"
+                        >
+                            {selectedTask.completed ? 'وضع علامة كغير مكتملة' : 'وضع علامة كمكتملة'}
+                        </button>
                     </div>
                 )}
             </Modal>
