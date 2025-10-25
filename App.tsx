@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { TopAppBar } from './components/TopAppBar';
 import { BottomNavBar } from './components/BottomNavBar';
 import { FloatingActionButton } from './components/FloatingActionButton';
@@ -38,6 +38,7 @@ const App: React.FC = () => {
     const [isTaskDetailModalOpen, setIsTaskDetailModalOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isAlertDetailModalOpen, setIsAlertDetailModalOpen] = useState(false);
+    const [isAllAlertsModalOpen, setIsAllAlertsModalOpen] = useState(false);
     const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
 
 
@@ -136,8 +137,11 @@ const App: React.FC = () => {
     }, []);
 
     const handleStatClick = (stat: Stat) => {
-        // Allow editing for stats with specific titles
-        if (stat.title === 'إنتاج الحليب (لتر/يوم)' || stat.title === 'الأعلاف المتاحة (طن)') {
+        if (stat.title === 'إجمالي القطيع') {
+            handleNavigate('herd');
+        } else if (stat.title === 'تنبيهات نشطة') {
+            setIsAllAlertsModalOpen(true);
+        } else if (stat.title === 'إنتاج الحليب (لتر/يوم)' || stat.title === 'الأعلاف المتاحة (طن)') {
             setEditingStat(stat);
             setIsEditStatModalOpen(true);
         }
@@ -153,12 +157,24 @@ const App: React.FC = () => {
         setIsAlertDetailModalOpen(true);
     };
 
+    const dynamicStats = useMemo(() => {
+        return stats.map(stat => {
+            if (stat.title === 'إجمالي القطيع') {
+                return { ...stat, value: herd.length.toString() };
+            }
+            if (stat.title === 'تنبيهات نشطة') {
+                return { ...stat, value: alerts.length.toString() };
+            }
+            return stat;
+        });
+    }, [stats, herd, alerts]);
+
 
     const renderPage = () => {
         switch (page) {
             case 'dashboard':
                 return <DashboardPage
-                    stats={stats}
+                    stats={dynamicStats}
                     kpiData={KPI_DATA}
                     tasks={tasks.filter(t => !t.completed).slice(0, 3)}
                     alerts={alerts.slice(0, 3)}
@@ -178,7 +194,7 @@ const App: React.FC = () => {
                 return <ShepherdsPage shepherds={shepherds} onDeleteShepherd={handleDeleteShepherd} />;
             default:
                 return <DashboardPage 
-                    stats={stats} 
+                    stats={dynamicStats} 
                     kpiData={KPI_DATA} 
                     tasks={tasks.filter(t => !t.completed).slice(0, 3)} 
                     alerts={alerts.slice(0, 3)}
@@ -270,6 +286,25 @@ const App: React.FC = () => {
                         {selectedAlert.description && <p className="pt-2 border-t border-border-light dark:border-border-dark"><strong className="font-semibold">الوصف:</strong> {selectedAlert.description}</p>}
                     </div>
                 )}
+            </Modal>
+             <Modal isOpen={isAllAlertsModalOpen} onClose={() => setIsAllAlertsModalOpen(false)} title="جميع التنبيهات النشطة">
+                <div className="max-h-[60vh] overflow-y-auto -mr-2 pr-2 space-y-3">
+                    {alerts.map((alert, index) => {
+                        const iconColor = alert.type === 'danger' ? 'bg-danger/10 text-danger' : 'bg-warning/10 text-warning';
+                        return (
+                            <div key={index} onClick={() => openAlertDetails(alert)} className="flex items-center gap-4 p-3 rounded-lg bg-background-light dark:bg-background-dark cursor-pointer">
+                                <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full ${iconColor}`}>
+                                    <span className="material-symbols-outlined">{alert.icon}</span>
+                                </div>
+                                <div className="flex-1">
+                                    <p className="font-semibold text-text-light-primary dark:text-dark-primary">{alert.title}</p>
+                                    <p className="text-sm text-text-light-secondary dark:text-dark-secondary">{alert.time}</p>
+                                </div>
+                                <span className="material-symbols-outlined text-text-light-secondary dark:text-dark-secondary">chevron_left</span>
+                            </div>
+                        )
+                    })}
+                </div>
             </Modal>
         </div>
     );
