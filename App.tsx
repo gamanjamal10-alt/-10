@@ -78,7 +78,7 @@ const App: React.FC = () => {
             case 'المهام':
                 return <TasksPage tasks={tasks} onToggleTask={handleToggleTask} />;
             case 'التقارير':
-                return <ReportsPage />;
+                return <ReportsPage tasks={tasks} herd={herd} />;
             default:
                 return <DashboardPage tasks={tasks} alerts={alerts} onViewAllTasks={() => setActivePage('المهام')} onToggleTask={handleToggleTask} />;
         }
