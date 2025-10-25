@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>لوحة تحكم إدارة القطيع</title>
+    <title>حضيرتي</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18,8 +18,8 @@
         'opsz' 24
       }
       ::selection {
-        background-color: #D7CCC8;
-        color: #5D4037;
+        background-color: #A5D6A7; /* Light Green */
+        color: #1B5E20; /* Dark Green */
       }
     </style>
     <script id="tailwind-config">
@@ -28,20 +28,21 @@
         theme: {
           extend: {
             colors: {
-              "primary": "#005A9C",
-              "secondary": "#2E7D32",
+              "primary": "#2E7D32", // A rich, natural green
+              "primary-light": "#A5D6A7",
+              "secondary": "#005A9C", // Kept for specific accents if needed
               "danger": "#D32F2F",
               "warning": "#FFA000",
-              "background-light": "#F5F5F5",
-              "background-dark": "#F3EADF",
-              "text-light-primary": "#212121",
-              "text-light-secondary": "#616161",
-              "text-dark-primary": "#5D4037",
-              "text-dark-secondary": "#8D6E63",
+              "background-light": "#F7F9F7", // A very light, almost white green
+              "background-dark": "#121C13", // A very dark, desaturated green
+              "text-light-primary": "#1B201B",
+              "text-light-secondary": "#566057",
+              "text-dark-primary": "#E8F5E9",
+              "text-dark-secondary": "#A5C2A5",
               "card-light": "#FFFFFF",
-              "card-dark": "#FCF6EC",
+              "card-dark": "#1B2B1D",
               "border-light": "#E0E0E0",
-              "border-dark": "#D7CCC8",
+              "border-dark": "#384B3A",
             },
             fontFamily: {
               "display": ["Inter", "sans-serif"]

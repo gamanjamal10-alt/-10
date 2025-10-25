@@ -1,24 +1,25 @@
-// FIX: Replaced placeholder content with a full implementation for the DashboardPage component.
 import React, { useState } from 'react';
 import { StatCard } from '../components/StatCard';
 import { KpiCard } from '../components/KpiCard';
 import { TaskList } from '../components/TaskList';
 import { AlertList } from '../components/AlertList';
 import { Modal } from '../components/Modal';
-import { STATS_DATA, KPI_DATA, TASKS_DATA, ALERTS_DATA } from '../constants';
+import { STATS_DATA, KPI_DATA } from '../constants';
 import type { Task, Alert } from '../types';
 
-export const DashboardPage: React.FC = () => {
+interface DashboardPageProps {
+    tasks: Task[];
+    alerts: Alert[];
+    onViewAllTasks: () => void;
+    onViewAllAlerts?: () => void;
+}
+
+export const DashboardPage: React.FC<DashboardPageProps> = ({ tasks, alerts, onViewAllTasks, onViewAllAlerts }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Task | Alert | null>(null);
 
-    const handleTaskClick = (task: Task) => {
-        setSelectedItem(task);
-        setIsModalOpen(true);
-    };
-
-    const handleAlertClick = (alert: Alert) => {
-        setSelectedItem(alert);
+    const handleItemClick = (item: Task | Alert) => {
+        setSelectedItem(item);
         setIsModalOpen(true);
     };
 
@@ -52,7 +53,7 @@ export const DashboardPage: React.FC = () => {
     };
     
     return (
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-6">
             {/* Stats Section */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {STATS_DATA.map(stat => <StatCard key={stat.title} {...stat} />)}
@@ -62,10 +63,10 @@ export const DashboardPage: React.FC = () => {
             <KpiCard kpiData={KPI_DATA} />
 
             {/* Tasks Section */}
-            <TaskList title="مهام اليوم" tasks={TASKS_DATA.slice(0, 2)} onTaskClick={handleTaskClick} onViewAllClick={() => console.log("View all tasks")} />
+            <TaskList title="المهام القادمة" tasks={tasks} onTaskClick={handleItemClick} onViewAllClick={onViewAllTasks} />
 
             {/* Alerts Section */}
-            <AlertList title="أحدث التنبيهات" alerts={ALERTS_DATA} onAlertClick={handleAlertClick} onViewAllClick={() => console.log("View all alerts")} />
+            <AlertList title="التنبيهات الأخيرة" alerts={alerts} onAlertClick={handleItemClick} onViewAllClick={onViewAllAlerts} />
 
             {/* Details Modal */}
             <Modal isOpen={isModalOpen} onClose={closeModal} title="تفاصيل العنصر">

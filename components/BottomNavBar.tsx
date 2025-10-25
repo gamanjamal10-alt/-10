@@ -15,11 +15,13 @@ interface NavItemProps {
 }
 
 const NavItem: React.FC<NavItemProps> = ({ name, icon, isActive, onClick }) => {
-    const colorClass = isActive ? 'text-primary' : 'text-text-light-secondary dark:text-dark-secondary';
+    const activeClass = isActive ? 'text-primary' : 'text-text-light-secondary dark:text-dark-secondary';
     return (
-        <a href="#" onClick={(e) => { e.preventDefault(); onClick(); }} className={`flex flex-col items-center gap-1 ${colorClass} transition-colors`}>
-            <span className="material-symbols-outlined">{icon}</span>
-            <span className="text-xs font-medium">{name}</span>
+        <a href="#" onClick={(e) => { e.preventDefault(); onClick(); }} className="flex flex-col items-center gap-1 w-20 transition-colors group">
+            <div className={`relative flex items-center justify-center h-8 w-16 rounded-full transition-colors ${isActive ? 'bg-primary/10' : ''}`}>
+                 <span className={`material-symbols-outlined transition-colors ${activeClass}`}>{icon}</span>
+            </div>
+            <span className={`text-xs font-medium transition-colors ${activeClass}`}>{name}</span>
         </a>
     );
 };
@@ -31,7 +33,7 @@ interface BottomNavBarProps {
 
 export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeItem, onNavigate }) => {
     return (
-        <div className="fixed bottom-0 left-0 right-0 h-20 bg-card-light dark:bg-card-dark border-t border-border-light dark:border-border-dark flex justify-around items-center z-10">
+        <div className="fixed bottom-0 left-0 right-0 h-20 bg-card-light/80 dark:bg-card-dark/80 backdrop-blur-sm border-t border-border-light dark:border-border-dark flex justify-around items-center z-30">
             {navItems.map(item => (
                 <NavItem
                     key={item.name}

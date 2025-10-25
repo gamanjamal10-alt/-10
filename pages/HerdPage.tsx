@@ -1,11 +1,13 @@
-// FIX: Replaced placeholder content with a full implementation for the HerdPage component.
 import React, { useState } from 'react';
 import { AnimalCard } from '../components/AnimalCard';
 import { Modal } from '../components/Modal';
-import { HERD_DATA } from '../constants';
 import type { Animal } from '../types';
 
-export const HerdPage: React.FC = () => {
+interface HerdPageProps {
+    herd: Animal[];
+}
+
+export const HerdPage: React.FC<HerdPageProps> = ({ herd }) => {
     const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -21,8 +23,8 @@ export const HerdPage: React.FC = () => {
 
     return (
         <div className="p-4 space-y-3">
-            <h2 className="text-lg font-bold text-text-light-primary dark:text-dark-primary px-2">قائمة القطيع ({HERD_DATA.length})</h2>
-            {HERD_DATA.map(animal => (
+            <h2 className="text-lg font-bold text-text-light-primary dark:text-dark-primary px-2">قائمة القطيع ({herd.length})</h2>
+            {herd.map(animal => (
                 <AnimalCard key={animal.id} animal={animal} onClick={handleAnimalClick} />
             ))}
 

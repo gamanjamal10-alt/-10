@@ -1,10 +1,10 @@
 import type { Stat, KpiData, Task, Alert, Animal } from './types';
 
 export const STATS_DATA: Stat[] = [
-    { title: 'إجمالي القطيع', value: '150 رأس' },
-    { title: 'حالات مرضية', value: '3 حالات', color: 'warning' },
-    { title: 'تنبيهات حرجة', value: '1 حالة', color: 'danger' },
-    { title: 'إنتاج الحليب اليومي', value: '2,500 لتر' },
+    { title: 'إجمالي القطيع', value: '150 رأس', icon: 'pets' },
+    { title: 'حالات مرضية', value: '3 حالات', color: 'warning', icon: 'sick' },
+    { title: 'تنبيهات حرجة', value: '1 حالة', color: 'danger', icon: 'warning' },
+    { title: 'إنتاج الحليب اليومي', value: '2,500 لتر', icon: 'science' },
 ];
 
 export const KPI_DATA: KpiData = {
@@ -44,7 +44,6 @@ export const TASKS_DATA: Task[] = [
     { id: 1, title: 'تطعيم الأبقار دفعة #3', dueDate: 'اليوم، 10:00 صباحًا', priority: 'high', description: 'تطعيم 25 بقرة من الدفعة الثالثة باللقاح الرباعي.' },
     { id: 2, title: 'فحص دوري للمواليد الجدد', dueDate: 'غدًا، 9:00 صباحًا', priority: 'normal', description: 'فحص العلامات الحيوية ووزن المواليد الجدد في الحظيرة رقم 5.' },
     { id: 3, title: 'صيانة نظام الري المحوري', dueDate: '25 يوليو، 2:00 ظهرًا', priority: 'normal' },
-    { id: 4, title: 'طلب علف جديد', dueDate: '26 يوليو، 4:00 عصرًا', priority: 'high', description: 'طلب 10 أطنان من علف التسمين من المورد المعتمد.' },
 ];
 
 export const ALERTS_DATA: Alert[] = [

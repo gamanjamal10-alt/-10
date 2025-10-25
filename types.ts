@@ -2,10 +2,11 @@ export interface Stat {
     title: string;
     value: string;
     color?: 'warning' | 'danger';
+    icon: string;
 }
 
 export interface Kpi {
-    title: string;
+    title:string;
     value: string;
     trend: string;
     trendDirection: 'up' | 'down';

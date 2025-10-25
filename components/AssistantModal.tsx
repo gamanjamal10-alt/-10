@@ -1,12 +1,9 @@
-// FIX: Replaced placeholder content with a full implementation for the AssistantModal component, adhering to the @google/genai SDK guidelines.
 import React, { useState, useEffect, useRef } from 'react';
-// FIX: Use GoogleGenAI and Chat from @google/genai as per guidelines
 import { GoogleGenAI, Chat } from "@google/genai";
 import { Modal } from './Modal';
 import Markdown from 'react-markdown';
+import type { Task, Alert, Animal } from '../types';
 
-// FIX: Initialize GoogleGenAI with named apiKey parameter and outside component.
-// Per instructions, API_KEY is available from process.env.API_KEY.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
 interface Message {
@@ -14,7 +11,17 @@ interface Message {
     parts: string;
 }
 
-export const AssistantModal: React.FC<{ isOpen: boolean; onClose: () => void; }> = ({ isOpen, onClose }) => {
+interface AssistantModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    appData: {
+        tasks: Task[];
+        alerts: Alert[];
+        herd: Animal[];
+    }
+}
+
+export const AssistantModal: React.FC<AssistantModalProps> = ({ isOpen, onClose, appData }) => {
     const [prompt, setPrompt] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [history, setHistory] = useState<Message[]>([]);
@@ -22,20 +29,27 @@ export const AssistantModal: React.FC<{ isOpen: boolean; onClose: () => void; }>
     const chatRef = useRef<Chat | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
+    const generateContext = () => {
+        return `
+        Here is the current farm data for "حضيرتي":
+        - Upcoming Tasks: ${JSON.stringify(appData.tasks)}
+        - Recent Alerts: ${JSON.stringify(appData.alerts)}
+        - Herd Status: ${JSON.stringify(appData.herd)}
+        `;
+    };
+
     useEffect(() => {
         if (isOpen) {
-            // FIX: Use ai.chats.create for chat session management as per guidelines.
             chatRef.current = ai.chats.create({
-                // FIX: Use 'gemini-2.5-flash', a recommended model for basic text tasks.
                 model: 'gemini-2.5-flash',
                 config: {
-                    systemInstruction: 'You are an expert AI assistant for a modern dairy farm. Your role is to help the farm manager with tasks, analysis, and information related to herd health, milk production, and daily operations. Provide concise, practical, and data-driven advice. All your responses should be in Arabic.',
+                    systemInstruction: 'أنت مساعد ذكاء اصطناعي خبير في تطبيق "حضيرتي" لإدارة مزارع الألبان الحديثة. دورك هو مساعدة مدير المزرعة في المهام والتحليلات والمعلومات المتعلقة بصحة القطيع وإنتاج الحليب والعمليات اليومية. قدم نصائح موجزة وعملية ومبنية على البيانات. يجب أن تكون جميع ردودك باللغة العربية.',
                 },
             });
-            // Reset state for new session
             setHistory([]);
             setPrompt('');
             setError(null);
+            getDailySummary();
         }
     }, [isOpen]);
 
@@ -43,6 +57,26 @@ export const AssistantModal: React.FC<{ isOpen: boolean; onClose: () => void; }>
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [history, isLoading]);
 
+    const getDailySummary = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const context = generateContext();
+            const summaryPrompt = "قدم لي ملخصًا صباحيًا موجزًا عن حالة المزرعة اليوم بناءً على هذه البيانات. سلط الضوء على أهم 3 نقاط تتطلب انتباهي.";
+            
+            // This is a temporary chat session for the summary
+            const summaryChat = ai.chats.create({ model: 'gemini-2.5-flash' });
+            const result = await summaryChat.sendMessage({ message: `${context}\n\n${summaryPrompt}` });
+
+            const modelResponse: Message = { role: 'model', parts: result.text };
+            setHistory([modelResponse]);
+        } catch (e) {
+            console.error(e);
+            setError('عذرًا، لم أتمكن من إنشاء الملخص اليومي.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const sendMessage = async () => {
         if (!prompt.trim() || !chatRef.current) return;
@@ -52,18 +86,19 @@ export const AssistantModal: React.FC<{ isOpen: boolean; onClose: () => void; }>
         
         const userMessage: Message = { role: 'user', parts: prompt };
         setHistory(prev => [...prev, userMessage]);
+        
+        const currentPrompt = prompt;
         setPrompt('');
 
         try {
-            const result = await chatRef.current.sendMessage({ message: prompt });
-            // FIX: Use the response.text property to get the model's text response, as per guidelines.
+            const context = generateContext();
+            const result = await chatRef.current.sendMessage({ message: `${context}\n\nUser question: ${currentPrompt}`});
             const modelResponse: Message = { role: 'model', parts: result.text };
             setHistory(prev => [...prev, modelResponse]);
 
         } catch (e) {
             console.error(e);
             setError('عذرًا، حدث خطأ أثناء التواصل مع المساعد. يرجى المحاولة مرة أخرى.');
-            // Rollback user message on error
             setHistory(prev => prev.slice(0, -1));
         } finally {
             setIsLoading(false);
@@ -81,23 +116,17 @@ export const AssistantModal: React.FC<{ isOpen: boolean; onClose: () => void; }>
         <Modal isOpen={isOpen} onClose={onClose} title="المساعد الذكي">
             <div className="flex flex-col h-[60vh]">
                 <div className="flex-1 overflow-y-auto p-2 space-y-4">
-                    {history.length === 0 && !isLoading && (
-                        <div className="text-center text-text-light-secondary dark:text-dark-secondary pt-10">
-                            <span className="material-symbols-outlined text-5xl">smart_toy</span>
-                            <p className="mt-2">كيف يمكنني مساعدتك في إدارة المزرعة اليوم؟</p>
-                        </div>
-                    )}
                     {history.map((msg, index) => (
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`p-3 rounded-2xl max-w-[80%] ${msg.role === 'user' ? 'bg-primary text-white rounded-br-none' : 'bg-background-light dark:bg-background-dark rounded-bl-none'}`}>
+                            <div className={`p-3 rounded-2xl max-w-[85%] ${msg.role === 'user' ? 'bg-primary text-white rounded-br-none' : 'bg-background-light dark:bg-card-dark rounded-bl-none text-text-light-primary dark:text-dark-primary'}`}>
                                 <Markdown className="prose prose-sm dark:prose-invert max-w-none break-words">{msg.parts}</Markdown>
                             </div>
                         </div>
                     ))}
                      {isLoading && (
                         <div className="flex justify-start">
-                             <div className="p-3 rounded-2xl max-w-[80%] bg-background-light dark:bg-background-dark rounded-bl-none">
-                                <span className="animate-pulse">...يفكر</span>
+                             <div className="p-3 rounded-2xl max-w-[80%] bg-background-light dark:bg-card-dark rounded-bl-none">
+                                <p className="text-text-light-secondary dark:text-dark-secondary animate-pulse">...يفكر</p>
                             </div>
                         </div>
                     )}
@@ -114,7 +143,7 @@ export const AssistantModal: React.FC<{ isOpen: boolean; onClose: () => void; }>
                         disabled={isLoading}
                         className="flex-1 p-2 rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-primary focus:border-primary text-text-light-primary dark:text-dark-primary"
                     />
-                    <button onClick={sendMessage} disabled={isLoading || !prompt.trim()} className="p-2 bg-primary text-white rounded-full disabled:bg-gray-400 flex items-center justify-center w-10 h-10">
+                    <button onClick={sendMessage} disabled={isLoading || !prompt.trim()} className="p-2 bg-primary text-white rounded-full disabled:opacity-50 flex items-center justify-center w-10 h-10 transition-opacity">
                         <span className="material-symbols-outlined">send</span>
                     </button>
                 </div>
