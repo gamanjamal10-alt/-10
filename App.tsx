@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 
 // Components
@@ -21,7 +20,7 @@ import { ShepherdsPage } from './pages/ShepherdsPage';
 
 // Data and Types
 import type { Page, Task, Animal, Alert, Shepherd } from './types';
-import { STATS_DATA, KPI_DATA, INITIAL_TASKS, INITIAL_ALERTS, INITIAL_HERD, FARM_EVENTS, INITIAL_SHEPHERDS } from './constants';
+import { KPI_DATA, INITIAL_TASKS, INITIAL_ALERTS, INITIAL_HERD, FARM_EVENTS, INITIAL_SHEPHERDS } from './constants';
 
 const App = () => {
     // State
@@ -37,10 +36,27 @@ const App = () => {
 
     // Memos for derived data
     const alerts = useMemo(() => INITIAL_ALERTS, []);
-    const stats = useMemo(() => STATS_DATA, []);
     const kpiData = useMemo(() => KPI_DATA, []);
     const farmEvents = useMemo(() => FARM_EVENTS, []);
     
+    const dynamicStats = useMemo(() => {
+        const totalCattle = herd.filter(a => a.type === 'cattle').length;
+        const totalSheep = herd.filter(a => a.type === 'sheep').length;
+        const milkingCows = herd.filter(a => a.subType === 'بقرة حلوب').length;
+        const milkProduction = milkingCows * 25;
+        const healthyPercentage = herd.length > 0 ? Math.round((herd.filter(a => a.healthStatus === 'Healthy').length / herd.length) * 100) : 100;
+        const activeAlerts = alerts.length;
+
+        return [
+            { title: 'إجمالي الأبقار', value: totalCattle.toString(), icon: 'pets' },
+            { title: 'إجمالي الأغنام', value: totalSheep.toString(), icon: 'pets' },
+            { title: 'إنتاج الحليب (لتر/يوم)', value: milkProduction.toLocaleString(), icon: 'water_drop' },
+            { title: 'الحالة الصحية', value: `${healthyPercentage}% جيد`, icon: 'health_and_safety' },
+            { title: 'الأعلاف المتاحة (طن)', value: '12.5', icon: 'grass' },
+            { title: 'تنبيهات نشطة', value: activeAlerts.toString(), icon: 'notifications_active', color: 'warning' as 'warning' },
+        ];
+    }, [herd, alerts]);
+
     // Handlers
     const handleNavigation = (page: Page) => {
         setActivePage(page);
@@ -103,7 +119,7 @@ const App = () => {
         switch (activePage) {
             case 'dashboard':
                 return <DashboardPage
-                    stats={stats}
+                    stats={dynamicStats}
                     kpiData={kpiData}
                     tasks={tasks}
                     alerts={alerts}
@@ -121,7 +137,7 @@ const App = () => {
                 return <ShepherdsPage shepherds={shepherds} />;
             default:
                 return <DashboardPage
-                    stats={stats}
+                    stats={dynamicStats}
                     kpiData={kpiData}
                     tasks={tasks}
                     alerts={alerts}
