@@ -1,5 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+
+// Components
 import { TopAppBar } from './components/TopAppBar';
 import { BottomNavBar } from './components/BottomNavBar';
 import { FloatingActionButton } from './components/FloatingActionButton';
@@ -9,90 +11,108 @@ import { AddAnimalForm } from './components/AddAnimalForm';
 import { AddShepherdForm } from './components/AddShepherdForm';
 import { AssistantModal } from './components/AssistantModal';
 import { ImageEditorModal } from './components/ImageEditorModal';
+
+// Pages
 import { DashboardPage } from './pages/DashboardPage';
 import { HerdPage } from './pages/HerdPage';
 import { TasksPage } from './pages/TasksPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ShepherdsPage } from './pages/ShepherdsPage';
-import { STATS_DATA, KPI_DATA, TASKS_DATA, ALERTS_DATA, HERD_DATA, EVENTS_DATA, SHEPHERDS_DATA } from './constants';
-import type { Page, Task, Animal, Shepherd } from './types';
 
-function App() {
+// Data and Types
+import type { Page, Task, Animal, Alert, Shepherd } from './types';
+import { STATS_DATA, KPI_DATA, INITIAL_TASKS, INITIAL_ALERTS, INITIAL_HERD, FARM_EVENTS, INITIAL_SHEPHERDS } from './constants';
+
+const App = () => {
+    // State
     const [activePage, setActivePage] = useState<Page>('dashboard');
-    const [tasks, setTasks] = useState(TASKS_DATA);
-    const [herd, setHerd] = useState(HERD_DATA);
-    const [shepherds, setShepherds] = useState(SHEPHERDS_DATA);
-
+    const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+    const [herd, setHerd] = useState<Animal[]>(INITIAL_HERD);
+    const [shepherds, setShepherds] = useState<Shepherd[]>(INITIAL_SHEPHERDS);
+    
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isAssistantModalOpen, setIsAssistantModalOpen] = useState(false);
-    const [isImageEditorModalOpen, setIsImageEditorModalOpen] = useState(false);
+    const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
     const [animalToEdit, setAnimalToEdit] = useState<Animal | null>(null);
 
+    // Memos for derived data
+    const alerts = useMemo(() => INITIAL_ALERTS, []);
+    const stats = useMemo(() => STATS_DATA, []);
+    const kpiData = useMemo(() => KPI_DATA, []);
+    const farmEvents = useMemo(() => FARM_EVENTS, []);
+    
+    // Handlers
+    const handleNavigation = (page: Page) => {
+        setActivePage(page);
+    };
+
     const handleToggleTask = (taskId: number) => {
-        setTasks(currentTasks =>
-            currentTasks.map(task =>
+        setTasks(prevTasks =>
+            prevTasks.map(task =>
                 task.id === taskId ? { ...task, completed: !task.completed } : task
             )
         );
     };
 
-    const handleAddTask = (task: Omit<Task, 'id' | 'priority' | 'completed'>) => {
+    const handleAddTask = (taskData: Omit<Task, 'id' | 'completed' | 'priority'>) => {
         const newTask: Task = {
-            ...task,
             id: Date.now(),
-            priority: 'normal', // Default priority
+            ...taskData,
+            priority: 'normal',
             completed: false
         };
         setTasks(prevTasks => [newTask, ...prevTasks]);
         setIsAddModalOpen(false);
     };
 
-    const handleAddAnimal = (animal: Omit<Animal, 'id'>) => {
+    const handleAddAnimal = (animalData: Omit<Animal, 'id'>) => {
         const newAnimal: Animal = {
-            ...animal,
-            id: `${animal.type.charAt(0).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
+            id: `${animalData.type === 'cattle' ? 'C' : 'S'}${Date.now().toString().slice(-4)}`,
+            ...animalData,
+            imageUrl: animalData.imageUrl || `https://source.unsplash.com/400x400/?${animalData.type}`
         };
         setHerd(prevHerd => [newAnimal, ...prevHerd]);
         setIsAddModalOpen(false);
     };
-    
-    const handleAddShepherd = (shepherd: Omit<Shepherd, 'id'>) => {
+
+    const handleAddShepherd = (shepherdData: Omit<Shepherd, 'id'>) => {
         const newShepherd: Shepherd = {
-            ...shepherd,
             id: Date.now(),
+            ...shepherdData,
         };
-        setShepherds(prev => [newShepherd, ...prev]);
+        setShepherds(prevShepherds => [newShepherd, ...prevShepherds]);
         setIsAddModalOpen(false);
     };
     
-    const openImageEditor = (animal: Animal) => {
+    const handleOpenImageEditor = (animal: Animal) => {
         setAnimalToEdit(animal);
-        setIsImageEditorModalOpen(true);
+        setIsImageEditorOpen(true);
     };
-    
+
     const handleUpdateAnimalImage = (animalId: string, newImageUrl: string) => {
-        setHerd(currentHerd => 
-            currentHerd.map(animal => 
+        setHerd(prevHerd =>
+            prevHerd.map(animal =>
                 animal.id === animalId ? { ...animal, imageUrl: newImageUrl } : animal
             )
         );
-        setIsImageEditorModalOpen(false);
+        setIsImageEditorOpen(false);
     };
 
+    // Render logic
     const renderPage = () => {
         switch (activePage) {
             case 'dashboard':
                 return <DashboardPage
-                    stats={STATS_DATA}
-                    kpiData={KPI_DATA}
+                    stats={stats}
+                    kpiData={kpiData}
                     tasks={tasks}
-                    alerts={ALERTS_DATA}
+                    alerts={alerts}
                     onToggleTask={handleToggleTask}
                     onViewAllTasks={() => setActivePage('tasks')}
-                    onViewAllAlerts={() => { /* No alerts page yet */ }}
+                    onViewAllAlerts={() => { /* Can be implemented later */ }}
                 />;
             case 'herd':
-                return <HerdPage herd={herd} events={EVENTS_DATA} onEditImage={openImageEditor} />;
+                return <HerdPage herd={herd} events={farmEvents} onEditImage={handleOpenImageEditor} />;
             case 'tasks':
                 return <TasksPage tasks={tasks} onToggleTask={handleToggleTask} />;
             case 'reports':
@@ -100,11 +120,19 @@ function App() {
             case 'shepherds':
                 return <ShepherdsPage shepherds={shepherds} />;
             default:
-                return <div>Page not found</div>;
+                return <DashboardPage
+                    stats={stats}
+                    kpiData={kpiData}
+                    tasks={tasks}
+                    alerts={alerts}
+                    onToggleTask={handleToggleTask}
+                    onViewAllTasks={() => setActivePage('tasks')}
+                    onViewAllAlerts={() => { /* Can be implemented later */ }}
+                />;
         }
     };
     
-    const getAddForm = () => {
+    const renderAddForm = () => {
         switch (activePage) {
             case 'tasks':
                 return <AddItemForm onAddTask={handleAddTask} />;
@@ -113,7 +141,7 @@ function App() {
             case 'shepherds':
                  return <AddShepherdForm onAddShepherd={handleAddShepherd} />;
             default:
-                return <AddItemForm onAddTask={handleAddTask} />; // Default to adding a task
+                return null;
         }
     };
 
@@ -124,45 +152,49 @@ function App() {
             case 'herd':
                 return 'إضافة حيوان جديد';
             case 'shepherds':
-                return 'إضافة راعي جديد';
+                 return 'إضافة راعي جديد';
             default:
-                return 'إضافة عنصر جديد';
+                return 'إضافة عنصر';
         }
-    }
+    };
 
     return (
-        <div className="bg-background-light dark:bg-background-dark min-h-screen text-text-light-primary dark:text-dark-primary font-sans">
+        <div className="bg-background-light dark:bg-background-dark min-h-screen font-sans text-text-light-primary dark:text-dark-primary">
             <TopAppBar onAssistantClick={() => setIsAssistantModalOpen(true)} />
 
-            <main className="pt-16 pb-20">
+            {/* Main content with padding for app bars */}
+            <main className="pt-16 pb-16">
                 {renderPage()}
             </main>
-            
-            {(activePage === 'tasks' || activePage === 'herd' || activePage === 'shepherds') && (
-                 <FloatingActionButton onClick={() => setIsAddModalOpen(true)} />
+
+            {/* Show FAB for pages that support adding items */}
+            {['tasks', 'herd', 'shepherds'].includes(activePage) && (
+                <FloatingActionButton onClick={() => setIsAddModalOpen(true)} />
             )}
 
-            <BottomNavBar activePage={activePage} onNavigate={setActivePage} />
+            <BottomNavBar activePage={activePage} onNavigate={handleNavigation} />
             
+            {/* Add Item Modal */}
             <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title={getAddModalTitle()}>
-                {getAddForm()}
+                {renderAddForm()}
             </Modal>
             
-            <AssistantModal 
-                isOpen={isAssistantModalOpen} 
+            {/* AI Assistant Modal */}
+            <AssistantModal
+                isOpen={isAssistantModalOpen}
                 onClose={() => setIsAssistantModalOpen(false)}
-                appData={{ tasks, alerts: ALERTS_DATA, herd }}
+                appData={{ tasks, alerts, herd }}
             />
             
-            <ImageEditorModal 
-                isOpen={isImageEditorModalOpen}
-                onClose={() => setIsImageEditorModalOpen(false)}
+            {/* Image Editor Modal */}
+            <ImageEditorModal
+                isOpen={isImageEditorOpen}
+                onClose={() => setIsImageEditorOpen(false)}
                 animal={animalToEdit}
                 onUpdateAnimalImage={handleUpdateAnimalImage}
             />
-
         </div>
     );
-}
+};
 
 export default App;

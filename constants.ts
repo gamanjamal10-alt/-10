@@ -2,80 +2,89 @@
 import type { Stat, KpiData, Task, Alert, Animal, FarmEvent, Shepherd } from './types';
 
 export const STATS_DATA: Stat[] = [
-    { title: 'إجمالي الحيوانات', value: '128', icon: 'pets' },
-    { title: 'الولادات الجديدة', value: '4', icon: 'kid_star', color: 'warning' },
-    { title: 'حالات مرضية', value: '1', icon: 'sick', color: 'danger' },
-    { title: 'إنتاج الحليب (لتر)', value: '1,250', icon: 'water_drop' },
-    { title: 'المهام المكتملة', value: '8/12', icon: 'task_alt' },
-    { title: 'تنبيهات اليوم', value: '3', icon: 'notifications' },
+    { title: 'إجمالي القطيع', value: '152', icon: 'pets' },
+    { title: 'إنتاج الحليب (لتر/يوم)', value: '2,450', icon: 'water_drop' },
+    { title: 'الحالة الصحية', value: '98% جيد', icon: 'health_and_safety' },
+    { title: 'الأعلاف المتاحة (طن)', value: '12.5', icon: 'grass' },
+    { title: 'الأبقار الحلوب', value: '85', icon: 'female' },
+    { title: 'تنبيهات نشطة', value: '3', icon: 'notifications_active', color: 'warning' },
 ];
 
 export const KPI_DATA: KpiData = {
     'إنتاج الحليب': {
         title: 'متوسط إنتاج الحليب لكل بقرة حلوب',
-        value: '25.4 لتر/يوم',
+        value: '28.8 لتر/يوم',
         trend: '+2.1%',
         trendDirection: 'up',
         data: [
-            { name: 'Day 1', value: 24 }, { name: 'Day 7', value: 24.5 }, { name: 'Day 14', value: 25 }, 
-            { name: 'Day 21', value: 25.2 }, { name: 'Day 30', value: 25.4 }
-        ]
+            { name: 'Day 1', value: 28.5 },
+            { name: 'Day 7', value: 28.6 },
+            { name: 'Day 14', value: 28.7 },
+            { name: 'Day 21', value: 28.9 },
+            { name: 'Day 30', value: 28.8 },
+        ],
     },
-    'الصحة': {
-        title: 'نسبة القطيع السليم',
-        value: '98.4%',
-        trend: '-0.2%',
+    'جودة الحليب': {
+        title: 'عدد الخلايا الجسدية (SCC)',
+        value: '180,000',
+        trend: '-5.2%',
         trendDirection: 'down',
         data: [
-            { name: 'Day 1', value: 99 }, { name: 'Day 7', value: 98.8 }, { name: 'Day 14', value: 98.5 }, 
-            { name: 'Day 21', value: 98.6 }, { name: 'Day 30', value: 98.4 }
-        ]
+            { name: 'Day 1', value: 195000 },
+            { name: 'Day 7', value: 190000 },
+            { name: 'Day 14', value: 185000 },
+            { name: 'Day 21', value: 182000 },
+            { name: 'Day 30', value: 180000 },
+        ],
     },
-    'التكاليف': {
-        title: 'تكلفة العلف لكل حيوان',
-        value: '15.7 ريال/يوم',
+     'الخصوبة': {
+        title: 'معدل الحمل',
+        value: '42%',
         trend: '+1.5%',
         trendDirection: 'up',
         data: [
-            { name: 'Day 1', value: 15.2 }, { name: 'Day 7', value: 15.4 }, { name: 'Day 14', value: 15.5 }, 
-            { name: 'Day 21', value: 15.6 }, { name: 'Day 30', value: 15.7 }
-        ]
-    }
+            { name: 'Day 1', value: 40 },
+            { name: 'Day 7', value: 40.5 },
+            { name: 'Day 14', value: 41 },
+            { name: 'Day 21', value: 41.8 },
+            { name: 'Day 30', value: 42 },
+        ],
+    },
 };
 
-export const TASKS_DATA: Task[] = [
-    { id: 1, title: 'تطعيم الأبقار ضد الحمى القلاعية', dueDate: 'اليوم، 10:00 صباحًا', priority: 'high', completed: false, description: 'تطعيم مجموعة الأبقار (أ) باللقاح الجديد.' },
-    { id: 2, title: 'فحص صحة العجول حديثي الولادة', dueDate: 'اليوم، 2:00 ظهرًا', priority: 'high', completed: false, description: 'فحص العجول التي ولدت هذا الأسبوع والتأكد من حصولها على السرسوب.' },
-    { id: 3, title: 'صيانة آلات الحلب', dueDate: 'غدًا، 9:00 صباحًا', priority: 'normal', completed: false, description: 'التنظيف العميق والصيانة الدورية لآلات الحلب في الحظيرة الشمالية.' },
-    { id: 4, title: 'طلب شحنة علف جديدة', dueDate: 'غدًا، 4:00 عصرًا', priority: 'normal', completed: true },
-    { id: 5, title: 'تحديث سجلات التكاثر', dueDate: 'بعد غد', priority: 'normal', completed: false },
-    { id: 6, title: 'تنظيف الحظيرة رقم 3', dueDate: 'اليوم، 11:00 صباحًا', priority: 'normal', completed: true },
+export const INITIAL_TASKS: Task[] = [
+    { id: 1, title: 'تطعيم الأبقار ضد الحمى القلاعية', dueDate: 'اليوم، 10:00 صباحًا', priority: 'high', completed: false, description: 'تطعيم القطيع بالكامل. الجرعة 2 مل لكل بقرة.' },
+    { id: 2, title: 'فحص جودة الأعلاف الجديدة', dueDate: 'غدًا، 9:00 صباحًا', priority: 'normal', completed: false, description: 'أخذ عينات من شحنة البرسيم الجديدة وإرسالها للمختبر.' },
+    { id: 3, title: 'صيانة نظام الحلب الآلي', dueDate: 'بعد غد، 11:00 صباحًا', priority: 'normal', completed: false },
+    { id: 4, title: 'نقل العجول إلى الحظيرة الجديدة', dueDate: '25 يوليو 2024', priority: 'normal', completed: true, description: 'تم نقل 15 عجلًا بنجاح.' },
+    { id: 5, title: 'اجتماع مع الطبيب البيطري', dueDate: '28 يوليو 2024', priority: 'high', completed: false, description: 'مناقشة صحة القطيع وخطة الوقاية.' },
+    { id: 6, title: 'شراء أدوية بيطرية', dueDate: '30 يوليو 2024', priority: 'normal', completed: false },
 ];
 
-export const ALERTS_DATA: Alert[] = [
-    { title: 'درجة حرارة البقرة #112 مرتفعة', time: 'منذ 15 دقيقة', icon: 'thermostat', type: 'danger' },
-    { title: 'انخفاض إنتاج الحليب للبقرة #88', time: 'منذ ساعة', icon: 'trending_down', type: 'warning' },
-    { title: 'مستوى مخزون العلف منخفض', time: 'منذ 3 ساعات', icon: 'inventory_2', type: 'warning' },
-    { title: 'تم تسجيل ولادة جديدة', time: 'أمس', icon: 'kid_star', type: 'warning' },
+export const INITIAL_ALERTS: Alert[] = [
+    { title: 'انخفاض إنتاج الحليب للبقرة #112', time: 'منذ 3 ساعات', icon: 'trending_down', type: 'warning', description: 'انخفض إنتاج البقرة "جميلة" #112 بنسبة 15% اليوم. يوصى بالفحص.' },
+    { title: 'عاصفة رعدية متوقعة', time: 'اليوم، 8:00 مساءً', icon: 'thunderstorm', type: 'warning', description: 'يرجى التأكد من أن جميع الحيوانات في الحظائر المؤمنة.' },
+    { title: 'حالة مرضية: البقرة #205', time: 'أمس', icon: 'sick', type: 'danger', description: 'تم تشخيص البقرة "وردة" #205 بالتهاب الضرع. تم عزلها وبدء العلاج.' },
+    { title: 'مخزون الأعلاف منخفض', time: 'منذ يومين', icon: 'inventory_2', type: 'warning' },
 ];
 
-export const HERD_DATA: Animal[] = [
-    { id: 'C-0112', name: 'نجمة', type: 'cattle', breed: 'هولشتاين', subType: 'بقرة حلوب', age: 4, healthStatus: 'Under Observation', imageUrl: 'https://images.unsplash.com/photo-1570042707186-61421a14874d?w=400' },
-    { id: 'C-0088', name: 'برقة', type: 'cattle', breed: 'هولشتاين', subType: 'بقرة حلوب', age: 5, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1594183809673-e368a1f79f2d?w=400' },
-    { id: 'C-0201', name: 'شمس', type: 'cattle', breed: 'سيمينتال', subType: 'عجل', age: 1, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1587321551065-97e2c90e0c11?w=400' },
-    { id: 'S-0015', name: 'صوفيا', type: 'sheep', breed: 'نجدي', subType: 'سدسة', age: 3, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1588424490804-20a2b565a443?w=400' },
-    { id: 'S-0042', name: 'لؤلؤة', type: 'sheep', breed: 'نعيمي', subType: 'رباعي', age: 2, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1524453009893-c156a5d1219b?w=400' },
+export const INITIAL_HERD: Animal[] = [
+    { id: '112', name: 'جميلة', type: 'cattle', subType: 'بقرة حلوب', breed: 'هولشتاين', age: 4, healthStatus: 'Under Observation', imageUrl: 'https://images.unsplash.com/photo-1570042707185-85b253b7d1e0?q=80&w=2070&auto=format&fit=crop' },
+    { id: '205', name: 'وردة', type: 'cattle', subType: 'بقرة حلوب', breed: 'هولشتاين', age: 5, healthStatus: 'Sick', imageUrl: 'https://images.unsplash.com/photo-1590396115272-3f1981509893?q=80&w=1974&auto=format&fit=crop' },
+    { id: '301', name: 'سريعة', type: 'cattle', subType: 'عجل', breed: 'جيرسي', age: 0.5, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1554439121-17229559345c?q=80&w=2070&auto=format&fit=crop' },
+    { id: 'S01', name: 'فلفل', type: 'sheep', subType: 'خروف', breed: 'عواسي', age: 2, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1588466585717-22073d7bc146?q=80&w=1983&auto=format&fit=crop' },
+    { id: 'S02', name: 'قطنة', type: 'sheep', subType: 'سدسة', breed: 'نجدي', age: 3, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1524027734442-996b1b69a3b2?q=80&w=2070&auto=format&fit=crop' },
 ];
 
-export const EVENTS_DATA: FarmEvent[] = [
-    { id: 1, animalId: 'C-0112', date: '2024-07-20', description: 'تلقيح صناعي' },
-    { id: 2, animalId: 'C-0112', date: '2024-07-28', description: 'ارتفاع طفيف في درجة الحرارة، تم إعطاء خافض حرارة.' },
-    { id: 3, animalId: 'C-0088', date: '2024-07-15', description: 'فحص دوري، الحالة ممتازة.' },
-    { id: 4, animalId: 'S-0015', date: '2024-06-30', description: 'جز الصوف.' },
+export const FARM_EVENTS: FarmEvent[] = [
+    { id: 1, animalId: '112', date: '2024-07-20', description: 'فحص دوري - الحالة جيدة' },
+    { id: 2, animalId: '112', date: '2024-07-23', description: 'انخفاض طفيف في الشهية' },
+    { id: 3, animalId: '205', date: '2024-07-22', description: 'تشخيص التهاب الضرع، بدء العلاج بالمضادات الحيوية.' },
+    { id: 4, animalId: 'S01', date: '2024-06-15', description: 'تلقيح سنوي' },
 ];
 
-export const SHEPHERDS_DATA: Shepherd[] = [
-    { id: 1, name: 'أحمد عبدالله', phone: '0501234567', specialty: 'خبير تغذية', imageUrl: `https://i.pravatar.cc/150?u=ahmed` },
-    { id: 2, name: 'سالم محمد', phone: '0559876543', specialty: 'طبيب بيطري', imageUrl: `https://i.pravatar.cc/150?u=salem` },
-    { id: 3, name: 'علي حسن', phone: '0533456789', specialty: 'مسؤول الحلب', imageUrl: `https://i.pravatar.cc/150?u=ali` },
+export const INITIAL_SHEPHERDS: Shepherd[] = [
+    { id: 1, name: 'د. خالد الأحمد', phone: '0501234567', specialty: 'طبيب بيطري - أبقار', imageUrl: 'https://i.pravatar.cc/150?u=khaled' },
+    { id: 2, name: 'سالم المحمد', phone: '0557654321', specialty: 'خبير تغذية', imageUrl: 'https://i.pravatar.cc/150?u=salem' },
+    { id: 3, name: 'مريم العلي', phone: '0539876543', specialty: 'طبيبة بيطرية - أغنام', imageUrl: 'https://i.pravatar.cc/150?u=mariam' },
 ];
