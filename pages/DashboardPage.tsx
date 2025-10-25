@@ -68,11 +68,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ tasks, alerts, her
 
     const cattleCount = herd.filter(animal => animal.type === 'cattle').length;
     const sheepCount = herd.filter(animal => animal.type === 'sheep').length;
+    
+    // Dynamic milk production calculation
+    const milkingCows = herd.filter(animal => animal.type === 'cattle' && animal.subType === 'بقرة حلوب').length;
+    const dailyMilkProduction = milkingCows * 25; // Assuming 25 liters per milking cow
 
     const dynamicStats = [
         { title: 'عدد الأبقار', value: `${cattleCount} رأس`, icon: 'pets' },
         { title: 'عدد الأغنام', value: `${sheepCount} رأس`, icon: 'pets' },
-        ...STATS_DATA.map(s => ({...s, value: s.title === 'إنتاج الحليب اليومي' ? '2,500 لتر' : s.title === 'حالات مرضية' ? '3 حالات' : '1 حالة' }))
+        ...STATS_DATA.map(s => ({...s, value: s.title === 'إنتاج الحليب اليومي' ? `${dailyMilkProduction.toLocaleString()} لتر` : s.title === 'حالات مرضية' ? '3 حالات' : '1 حالة' }))
     ];
     
     return (

@@ -3,7 +3,7 @@ import { TopAppBar } from './components/TopAppBar';
 import { BottomNavBar } from './components/BottomNavBar';
 import { FloatingActionButton } from './components/FloatingActionButton';
 import { Modal } from './components/Modal';
-import { AddTaskForm } from './components/AddTaskForm';
+import { AddItemForm } from './components/AddItemForm';
 import { AddAnimalForm } from './components/AddAnimalForm';
 import { AssistantModal } from './components/AssistantModal';
 import { ImageEditorModal } from './components/ImageEditorModal';
@@ -122,7 +122,7 @@ const App: React.FC = () => {
 
             <Modal isOpen={isAddItemModalOpen} onClose={() => setIsAddItemModalOpen(false)} title={addItemFormType === 'task' ? 'إضافة مهمة جديدة' : 'إضافة حيوان جديد'}>
                 {addItemFormType === 'task' ? (
-                    <AddTaskForm onAddTask={handleAddTask} />
+                    <AddItemForm onAddTask={handleAddTask} />
                 ) : (
                     <AddAnimalForm onAddAnimal={handleAddAnimal} />
                 )}

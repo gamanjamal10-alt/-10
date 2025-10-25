@@ -5,6 +5,10 @@ interface AddAnimalFormProps {
     onAddAnimal: (animal: Omit<Animal, 'id'>) => void;
 }
 
+const cattleSubTypes = ['بقرة حلوب', 'عجل', 'ثور', 'بقرة'];
+const sheepSubTypes = ['سدسة', 'رباعي', 'ثنية', 'علوشة', 'خروف'];
+
+
 export const AddAnimalForm: React.FC<AddAnimalFormProps> = ({ onAddAnimal }) => {
     const [name, setName] = useState('');
     const [breed, setBreed] = useState('');
@@ -12,6 +16,8 @@ export const AddAnimalForm: React.FC<AddAnimalFormProps> = ({ onAddAnimal }) => 
     const [age, setAge] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [type, setType] = useState<AnimalType>('cattle');
+    
+    const subTypeOptions = type === 'cattle' ? cattleSubTypes : sheepSubTypes;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -34,6 +40,11 @@ export const AddAnimalForm: React.FC<AddAnimalFormProps> = ({ onAddAnimal }) => 
             setType('cattle');
         }
     };
+    
+    // Update subType to first option when main type changes
+    React.useEffect(() => {
+        setSubType(subTypeOptions[0] || '');
+    }, [type]);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -81,16 +92,19 @@ export const AddAnimalForm: React.FC<AddAnimalFormProps> = ({ onAddAnimal }) => 
             </div>
             <div>
                 <label htmlFor="subType" className="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-1">
-                    النوع الفرعي (اختياري)
+                    النوع
                 </label>
-                <input
+                 <select
                     id="subType"
-                    type="text"
                     value={subType}
                     onChange={(e) => setSubType(e.target.value)}
                     className="w-full p-2 rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-primary focus:border-primary"
-                    placeholder={type === 'cattle' ? "مثال: عجل، بقرة حلوب..." : "مثال: سدسة، رباعي، علوشة..."}
-                />
+                >
+                    <option value="" disabled>-- اختر النوع --</option>
+                    {subTypeOptions.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                    ))}
+                </select>
             </div>
             <div>
                 <label htmlFor="age" className="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-1">

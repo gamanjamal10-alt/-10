@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import type { Task } from '../types';
 
-interface AddTaskFormProps {
+interface AddItemFormProps {
     onAddTask: (task: Omit<Task, 'id' | 'priority' | 'completed'>) => void;
 }
 
-export const AddTaskForm: React.FC<AddTaskFormProps> = ({ onAddTask }) => {
+export const AddItemForm: React.FC<AddItemFormProps> = ({ onAddTask }) => {
     const [title, setTitle] = useState('');
     const [dueDate, setDueDate] = useState('');
 

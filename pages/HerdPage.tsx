@@ -21,14 +21,19 @@ const FilterButton: React.FC<{ label: string; isActive: boolean; onClick: () => 
 );
 
 export const HerdPage: React.FC<HerdPageProps> = ({ herd, events, onEditImage }) => {
-    const [filter, setFilter] = useState<'all' | AnimalType>('all');
+    const [filter, setFilter] = useState<'all' | AnimalType | 'newborns'>('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
 
     const filteredHerd = useMemo(() => {
-        return herd
-            .filter(animal => filter === 'all' || animal.type === filter)
-            .filter(animal =>
+        let herdToShow = herd;
+        if (filter === 'newborns') {
+            herdToShow = herd.filter(animal => animal.age < 1);
+        } else if (filter !== 'all') {
+            herdToShow = herd.filter(animal => animal.type === filter);
+        }
+
+        return herdToShow.filter(animal =>
                 animal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 animal.id.toLowerCase().includes(searchTerm.toLowerCase())
             );
@@ -64,10 +69,11 @@ export const HerdPage: React.FC<HerdPageProps> = ({ herd, events, onEditImage })
                         search
                     </span>
                 </div>
-                <div className="flex justify-center gap-2 mt-3">
+                <div className="flex justify-center gap-2 mt-3 flex-wrap">
                     <FilterButton label="الكل" isActive={filter === 'all'} onClick={() => setFilter('all')} />
                     <FilterButton label="الأبقار" isActive={filter === 'cattle'} onClick={() => setFilter('cattle')} />
                     <FilterButton label="الأغنام" isActive={filter === 'sheep'} onClick={() => setFilter('sheep')} />
+                    <FilterButton label="المواليد الجدد" isActive={filter === 'newborns'} onClick={() => setFilter('newborns')} />
                 </div>
             </div>
 
@@ -91,6 +97,7 @@ export const HerdPage: React.FC<HerdPageProps> = ({ herd, events, onEditImage })
                         <img src={selectedAnimal.imageUrl} alt={selectedAnimal.name} className="w-full h-48 object-cover rounded-lg mb-4" />
                         <p><strong className="font-semibold">الرقم التعريفي:</strong> #{selectedAnimal.id}</p>
                         <p><strong className="font-semibold">السلالة:</strong> {selectedAnimal.breed}</p>
+                         {selectedAnimal.subType && <p><strong className="font-semibold">النوع:</strong> {selectedAnimal.subType}</p>}
                         <p><strong className="font-semibold">العمر:</strong> {selectedAnimal.age} سنوات</p>
                         <p><strong className="font-semibold">الحالة الصحية:</strong> {selectedAnimal.healthStatus}</p>
                         
