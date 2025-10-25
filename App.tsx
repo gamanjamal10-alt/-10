@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TopAppBar } from './components/TopAppBar';
 import { BottomNavBar } from './components/BottomNavBar';
 import { FloatingActionButton } from './components/FloatingActionButton';
@@ -16,176 +16,157 @@ import { TasksPage } from './pages/TasksPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ShepherdsPage } from './pages/ShepherdsPage';
 
-import type { Page, Stat, Task, Alert, Animal, Shepherd, FarmEvent } from './types';
-import { STATS_DATA, INITIAL_TASKS, INITIAL_ALERTS, INITIAL_HERD, INITIAL_SHEPHERDS, KPI_DATA, FARM_EVENTS } from './constants';
+import type { Page, Task, Alert, Animal, Shepherd, Stat } from './types';
+import { 
+    INITIAL_TASKS, 
+    INITIAL_ALERTS, 
+    INITIAL_HERD, 
+    INITIAL_SHEPHERDS, 
+    STATS_DATA, 
+    KPI_DATA, 
+    FARM_EVENTS 
+} from './constants';
 
 const App: React.FC = () => {
+    const [isDarkMode, setIsDarkMode] = useState(false);
     const [page, setPage] = useState<Page>('dashboard');
-    const [stats, setStats] = useState<Stat[]>(STATS_DATA.map((s, i) => ({ ...s, id: `stat-${i}` })));
+    
     const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
     const [alerts, setAlerts] = useState<Alert[]>(INITIAL_ALERTS);
     const [herd, setHerd] = useState<Animal[]>(INITIAL_HERD);
     const [shepherds, setShepherds] = useState<Shepherd[]>(INITIAL_SHEPHERDS);
-    const [farmEvents, setFarmEvents] = useState<FarmEvent[]>(FARM_EVENTS);
-
-    const [isAssistantModalOpen, setIsAssistantModalOpen] = useState(false);
+    const [stats, setStats] = useState<Stat[]>(STATS_DATA);
+    
     const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
-    const [addItemFormType, setAddItemFormType] = useState<'task' | 'animal' | 'shepherd' | null>(null);
-    const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
-    const [editingAnimalImage, setEditingAnimalImage] = useState<Animal | null>(null);
-    const [isEditStatModalOpen, setIsEditStatModalOpen] = useState(false);
-    const [editingStat, setEditingStat] = useState<Stat | null>(null);
-    const [isTaskDetailModalOpen, setIsTaskDetailModalOpen] = useState(false);
+    const [addItemType, setAddItemType] = useState<'task' | 'animal' | 'shepherd' | null>(null);
+    const [isAssistantModalOpen, setIsAssistantModalOpen] = useState(false);
+    
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-    const [isAlertDetailModalOpen, setIsAlertDetailModalOpen] = useState(false);
-    const [isAllAlertsModalOpen, setIsAllAlertsModalOpen] = useState(false);
     const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+    const [selectedAnimalForEdit, setSelectedAnimalForEdit] = useState<Animal | null>(null);
+    const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
+    
+    const [selectedStat, setSelectedStat] = useState<Stat | null>(null);
+    const [isEditStatModalOpen, setIsEditStatModalOpen] = useState(false);
 
+    useEffect(() => {
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [isDarkMode]);
 
-    const handleNavigate = (newPage: Page) => {
-        setPage(newPage);
-    };
+    const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
-    const handleToggleTask = useCallback((taskId: number) => {
-        setTasks(prevTasks =>
-            prevTasks.map(task =>
+    const handleNavigate = (newPage: Page) => setPage(newPage);
+
+    const handleToggleTask = (taskId: number) => {
+        setTasks(currentTasks => 
+            currentTasks.map(task => 
                 task.id === taskId ? { ...task, completed: !task.completed } : task
             )
         );
-        // Also update in modal if it's open
-        if (selectedTask && selectedTask.id === taskId) {
-            setSelectedTask(prev => prev ? { ...prev, completed: !prev.completed } : null);
-        }
-    }, [selectedTask]);
-
-    const handleDeleteTask = useCallback((taskId: number) => {
-        setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
-    }, []);
-
-    const handleAddTask = useCallback((taskData: Omit<Task, 'id' | 'priority' | 'completed'>) => {
-        const newTask: Task = {
-            id: Date.now(),
-            ...taskData,
-            priority: 'normal',
-            completed: false,
-        };
-        setTasks(prevTasks => [newTask, ...prevTasks]);
-        setIsAddItemModalOpen(false);
-    }, []);
-
-    const handleDeleteAnimal = useCallback((animalId: string) => {
-        setHerd(prevHerd => prevHerd.filter(animal => animal.id !== animalId));
-    }, []);
-
-
-    const handleAddAnimal = useCallback((animalData: Omit<Animal, 'id'>) => {
-        const newAnimal: Animal = {
-            id: `${animalData.type.charAt(0).toUpperCase()}${Math.floor(Math.random() * 1000)}`,
-            ...animalData,
-        };
-        setHerd(prevHerd => [newAnimal, ...prevHerd]);
-        setIsAddItemModalOpen(false);
-    }, []);
-    
-    const handleUpdateAnimalImage = useCallback((animalId: string, newImageUrl: string) => {
-        setHerd(prevHerd => prevHerd.map(animal => 
-            animal.id === animalId ? { ...animal, imageUrl: newImageUrl } : animal
-        ));
-        setIsImageEditorOpen(false);
-    }, []);
-
-    const handleEditImage = (animal: Animal) => {
-        setEditingAnimalImage(animal);
-        setIsImageEditorOpen(true);
+        setSelectedTask(prev => prev && prev.id === taskId ? { ...prev, completed: !prev.completed } : prev);
     };
 
-    const handleDeleteShepherd = useCallback((shepherdId: number) => {
-        setShepherds(prevShepherds => prevShepherds.filter(s => s.id !== shepherdId));
-    }, []);
-
-    const handleAddShepherd = useCallback((shepherdData: Omit<Shepherd, 'id'>) => {
-        const newShepherd: Shepherd = {
-            id: Date.now(),
-            ...shepherdData,
-        };
-        setShepherds(prevShepherds => [newShepherd, ...prevShepherds]);
-        setIsAddItemModalOpen(false);
-    }, []);
-
-    const handleFabClick = () => {
+    const handleOpenAddItemModal = () => {
         switch (page) {
-            case 'tasks':
-                setAddItemFormType('task');
-                break;
-            case 'herd':
-                setAddItemFormType('animal');
-                break;
-            case 'shepherds':
-                setAddItemFormType('shepherd');
-                break;
-            default:
-                return;
+            case 'tasks': setAddItemType('task'); break;
+            case 'herd': setAddItemType('animal'); break;
+            case 'shepherds': setAddItemType('shepherd'); break;
+            default: return;
         }
         setIsAddItemModalOpen(true);
     };
 
-    const handleUpdateStat = useCallback((statId: string, newValue: string) => {
-        setStats(prevStats => prevStats.map(stat => 
-            stat.id === statId ? { ...stat, value: new Intl.NumberFormat().format(Number(newValue)) } : stat
+    const handleAddTask = (task: Omit<Task, 'id' | 'priority' | 'completed'>) => {
+        const newTask: Task = {
+            id: Date.now(),
+            ...task,
+            priority: 'normal',
+            completed: false,
+        };
+        setTasks(prev => [newTask, ...prev]);
+        setIsAddItemModalOpen(false);
+    };
+    
+    const handleDeleteTask = (taskId: number) => {
+        setTasks(tasks.filter(task => task.id !== taskId));
+        setSelectedTask(null);
+    };
+
+    const handleAddAnimal = (animal: Omit<Animal, 'id'>) => {
+        const newAnimal: Animal = {
+            id: `${animal.type.charAt(0).toUpperCase()}${Date.now() % 1000}`,
+            ...animal
+        };
+        setHerd(prev => [newAnimal, ...prev]);
+        setIsAddItemModalOpen(false);
+    };
+    
+    const handleDeleteAnimal = (animalId: string) => {
+        setHerd(herd.filter(animal => animal.id !== animalId));
+    };
+
+    const handleAddShepherd = (shepherd: Omit<Shepherd, 'id'>) => {
+        const newShepherd: Shepherd = {
+            id: Date.now(),
+            ...shepherd,
+        };
+        setShepherds(prev => [newShepherd, ...prev]);
+        setIsAddItemModalOpen(false);
+    };
+
+    const handleDeleteShepherd = (id: number) => {
+        setShepherds(shepherds.filter(shepherd => shepherd.id !== id));
+    };
+    
+    const handleUpdateAnimalImage = (animalId: string, newImageUrl: string) => {
+        setHerd(herd.map(animal => 
+            animal.id === animalId ? { ...animal, imageUrl: newImageUrl } : animal
         ));
-        setIsEditStatModalOpen(false);
-    }, []);
+        setIsImageEditorOpen(false);
+    };
+
+    const handleOpenImageEditor = (animal: Animal) => {
+        setSelectedAnimalForEdit(animal);
+        setIsImageEditorOpen(true);
+    };
 
     const handleStatClick = (stat: Stat) => {
-        if (stat.title === 'إجمالي القطيع') {
-            handleNavigate('herd');
-        } else if (stat.title === 'تنبيهات نشطة') {
-            setIsAllAlertsModalOpen(true);
-        } else if (stat.title === 'إنتاج الحليب (لتر/يوم)' || stat.title === 'الأعلاف المتاحة (طن)') {
-            setEditingStat(stat);
+        if (stat.title === 'إنتاج الحليب (لتر/يوم)' || stat.title === 'الأعلاف المتاحة (طن)') {
+            const statWithId = { ...stat, id: stat.id || stat.title };
+            setSelectedStat(statWithId);
             setIsEditStatModalOpen(true);
+        } else if (stat.title === 'تنبيهات نشطة') {
+             // Future navigation to alerts page can be handled here
         }
     };
     
-    const openTaskDetails = (task: Task) => {
-        setSelectedTask(task);
-        setIsTaskDetailModalOpen(true);
+    const handleUpdateStat = (statId: string, newValue: string) => {
+        setStats(stats.map(stat =>
+            (stat.id || stat.title) === statId ? { ...stat, value: newValue } : stat
+        ));
+        setIsEditStatModalOpen(false);
     };
     
-    const openAlertDetails = (alert: Alert) => {
-        setSelectedAlert(alert);
-        setIsAlertDetailModalOpen(true);
-    };
-
-    const dynamicStats = useMemo(() => {
-        return stats.map(stat => {
-            if (stat.title === 'إجمالي القطيع') {
-                return { ...stat, value: herd.length.toString() };
-            }
-            if (stat.title === 'تنبيهات نشطة') {
-                return { ...stat, value: alerts.length.toString() };
-            }
-            return stat;
-        });
-    }, [stats, herd, alerts]);
-
-
     const renderPage = () => {
         switch (page) {
             case 'dashboard':
-                return <DashboardPage
-                    stats={dynamicStats}
+                return <DashboardPage 
+                    stats={stats}
                     kpiData={KPI_DATA}
                     tasks={tasks.filter(t => !t.completed).slice(0, 3)}
                     alerts={alerts.slice(0, 3)}
                     onTaskToggle={handleToggleTask}
                     onNavigate={handleNavigate}
                     onStatClick={handleStatClick}
-                    onTaskClick={openTaskDetails}
-                    onAlertClick={openAlertDetails}
+                    onTaskClick={(task) => setSelectedTask(task)}
+                    onAlertClick={(alert) => setSelectedAlert(alert)}
                 />;
             case 'herd':
-                return <HerdPage herd={herd} events={farmEvents} onEditImage={handleEditImage} onDeleteAnimal={handleDeleteAnimal}/>;
+                return <HerdPage herd={herd} events={FARM_EVENTS} onEditImage={handleOpenImageEditor} onDeleteAnimal={handleDeleteAnimal}/>;
             case 'tasks':
                 return <TasksPage tasks={tasks} onToggleTask={handleToggleTask} onDeleteTask={handleDeleteTask} />;
             case 'reports':
@@ -193,118 +174,111 @@ const App: React.FC = () => {
             case 'shepherds':
                 return <ShepherdsPage shepherds={shepherds} onDeleteShepherd={handleDeleteShepherd} />;
             default:
-                return <DashboardPage 
-                    stats={dynamicStats} 
-                    kpiData={KPI_DATA} 
-                    tasks={tasks.filter(t => !t.completed).slice(0, 3)} 
-                    alerts={alerts.slice(0, 3)}
-                    onTaskToggle={handleToggleTask}
-                    onNavigate={handleNavigate}
-                    onStatClick={handleStatClick}
-                    onTaskClick={openTaskDetails}
-                    onAlertClick={openAlertDetails}
-                />;
+                return <div className="p-4">Page not found</div>;
         }
     };
 
     const getAddItemModalTitle = () => {
-        switch (addItemFormType) {
-            case 'task': return 'إضافة مهمة جديدة';
-            case 'animal': return 'إضافة حيوان جديد';
-            case 'shepherd': return 'إضافة راعي جديد';
-            default: return 'إضافة';
-        }
+        if (addItemType === 'task') return 'إضافة مهمة جديدة';
+        if (addItemType === 'animal') return 'إضافة حيوان جديد';
+        if (addItemType === 'shepherd') return 'إضافة راعي جديد';
+        return 'إضافة عنصر';
     };
 
-    const renderAddItemForm = () => {
-        switch (addItemFormType) {
-            case 'task': return <AddItemForm onAddTask={handleAddTask} />;
-            case 'animal': return <AddAnimalForm onAddAnimal={handleAddAnimal} />;
-            case 'shepherd': return <AddShepherdForm onAddShepherd={handleAddShepherd} />;
-            default: return null;
-        }
+    const pageTitles: Record<Page, string> = {
+        dashboard: 'الرئيسية',
+        herd: 'القطيع',
+        tasks: 'المهام',
+        reports: 'التقارير',
+        shepherds: 'الرعاة',
     };
 
     return (
-        <div className="bg-background-light dark:bg-background-dark min-h-screen pb-20 pt-16">
-            <TopAppBar onAssistantClick={() => setIsAssistantModalOpen(true)} />
+        <div className="bg-background-light dark:bg-background-dark min-h-screen text-text-light-primary dark:text-dark-primary font-sans">
+            <TopAppBar 
+                onAssistantClick={() => setIsAssistantModalOpen(true)}
+                onThemeToggle={toggleTheme}
+                isDarkMode={isDarkMode}
+                pageTitle={pageTitles[page]}
+            />
             
-            <main className="mb-16">
+            <main className="pt-16 pb-20">
                 {renderPage()}
             </main>
-
-            {(page === 'tasks' || page === 'herd' || page === 'shepherds') && (
-                <FloatingActionButton onClick={handleFabClick} />
-            )}
             
+            {['tasks', 'herd', 'shepherds'].includes(page) && (
+                <FloatingActionButton onClick={handleOpenAddItemModal} />
+            )}
+
             <BottomNavBar activePage={page} onNavigate={handleNavigate} />
 
+            {/* Modals */}
             <AssistantModal 
                 isOpen={isAssistantModalOpen} 
-                onClose={() => setIsAssistantModalOpen(false)}
+                onClose={() => setIsAssistantModalOpen(false)} 
                 appData={{ tasks, alerts, herd }}
             />
-
-            <Modal 
-                isOpen={isAddItemModalOpen} 
-                onClose={() => setIsAddItemModalOpen(false)} 
+            
+            <Modal
+                isOpen={isAddItemModalOpen}
+                onClose={() => setIsAddItemModalOpen(false)}
                 title={getAddItemModalTitle()}
             >
-                {renderAddItemForm()}
+                {addItemType === 'task' && <AddItemForm onAddTask={handleAddTask} />}
+                {addItemType === 'animal' && <AddAnimalForm onAddAnimal={handleAddAnimal} />}
+                {addItemType === 'shepherd' && <AddShepherdForm onAddShepherd={handleAddShepherd} />}
             </Modal>
             
-            <ImageEditorModal
+             <ImageEditorModal
                 isOpen={isImageEditorOpen}
                 onClose={() => setIsImageEditorOpen(false)}
-                animal={editingAnimalImage}
+                animal={selectedAnimalForEdit}
                 onUpdateAnimalImage={handleUpdateAnimalImage}
             />
             
-            <EditStatModal
+            <EditStatModal 
                 isOpen={isEditStatModalOpen}
                 onClose={() => setIsEditStatModalOpen(false)}
-                stat={editingStat}
+                stat={selectedStat}
                 onUpdate={handleUpdateStat}
             />
 
-            <Modal isOpen={isTaskDetailModalOpen} onClose={() => setIsTaskDetailModalOpen(false)} title="تفاصيل المهمة">
+            <Modal isOpen={!!selectedTask} onClose={() => setSelectedTask(null)} title="تفاصيل المهمة">
                 {selectedTask && (
                      <div className="space-y-4">
-                        <p><strong className="font-semibold">المهمة:</strong> {selectedTask.title}</p>
-                        <p><strong className="font-semibold">الموعد النهائي:</strong> {selectedTask.dueDate}</p>
-                        <p><strong className="font-semibold">الأولوية:</strong> {selectedTask.priority === 'high' ? 'عالية' : 'عادية'}</p>
-                         <p><strong className="font-semibold">الحالة:</strong> {selectedTask.completed ? 'مكتملة' : 'قيد التنفيذ'}</p>
-                        {selectedTask.description && <p className="pt-2 border-t border-border-light dark:border-border-dark"><strong className="font-semibold">الوصف:</strong> {selectedTask.description}</p>}
+                        <div>
+                            <p className="mb-2"><strong className="font-semibold">المهمة:</strong> {selectedTask.title}</p>
+                            <p className="mb-2"><strong className="font-semibold">الموعد النهائي:</strong> {selectedTask.dueDate}</p>
+                            <p className="mb-2"><strong className="font-semibold">الأولوية:</strong> {selectedTask.priority === 'high' ? 'عالية' : 'عادية'}</p>
+                            <p className="mb-2"><strong className="font-semibold">الحالة:</strong> {selectedTask.completed ? 'مكتملة' : 'قيد التنفيذ'}</p>
+                            {selectedTask.description && <p><strong className="font-semibold">الوصف:</strong> {selectedTask.description}</p>}
+                        </div>
+                        <div className="space-y-2 pt-2">
+                            <button 
+                                onClick={() => handleToggleTask(selectedTask.id)} 
+                                className="w-full px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors"
+                            >
+                                {selectedTask.completed ? 'وضع علامة كغير مكتملة' : 'وضع علامة كمكتملة'}
+                            </button>
+                             <button 
+                                onClick={() => handleDeleteTask(selectedTask.id)} 
+                                className="w-full px-4 py-2 rounded-md border border-danger text-danger hover:bg-danger/10 transition-colors"
+                            >
+                                حذف المهمة
+                            </button>
+                        </div>
                     </div>
                 )}
             </Modal>
-            <Modal isOpen={isAlertDetailModalOpen} onClose={() => setIsAlertDetailModalOpen(false)} title="تفاصيل التنبيه">
+
+            <Modal isOpen={!!selectedAlert} onClose={() => setSelectedAlert(null)} title="تفاصيل التنبيه">
                 {selectedAlert && (
-                     <div className="space-y-4">
-                        <p><strong className="font-semibold">التنبيه:</strong> {selectedAlert.title}</p>
-                        <p><strong className="font-semibold">الوقت:</strong> {selectedAlert.time}</p>
-                        {selectedAlert.description && <p className="pt-2 border-t border-border-light dark:border-border-dark"><strong className="font-semibold">الوصف:</strong> {selectedAlert.description}</p>}
+                     <div className="space-y-2">
+                        <p className="mb-2"><strong className="font-semibold">التنبيه:</strong> {selectedAlert.title}</p>
+                        <p className="mb-2"><strong className="font-semibold">الوقت:</strong> {selectedAlert.time}</p>
+                        {selectedAlert.description && <p><strong className="font-semibold">الوصف:</strong> {selectedAlert.description}</p>}
                     </div>
                 )}
-            </Modal>
-             <Modal isOpen={isAllAlertsModalOpen} onClose={() => setIsAllAlertsModalOpen(false)} title="جميع التنبيهات النشطة">
-                <div className="max-h-[60vh] overflow-y-auto -mr-2 pr-2 space-y-3">
-                    {alerts.map((alert, index) => {
-                        const iconColor = alert.type === 'danger' ? 'bg-danger/10 text-danger' : 'bg-warning/10 text-warning';
-                        return (
-                            <div key={index} onClick={() => openAlertDetails(alert)} className="flex items-center gap-4 p-3 rounded-lg bg-background-light dark:bg-background-dark cursor-pointer">
-                                <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full ${iconColor}`}>
-                                    <span className="material-symbols-outlined">{alert.icon}</span>
-                                </div>
-                                <div className="flex-1">
-                                    <p className="font-semibold text-text-light-primary dark:text-dark-primary">{alert.title}</p>
-                                    <p className="text-sm text-text-light-secondary dark:text-dark-secondary">{alert.time}</p>
-                                </div>
-                                <span className="material-symbols-outlined text-text-light-secondary dark:text-dark-secondary">chevron_left</span>
-                            </div>
-                        )
-                    })}
-                </div>
             </Modal>
         </div>
     );
