@@ -8,6 +8,7 @@ interface AddAnimalFormProps {
 export const AddAnimalForm: React.FC<AddAnimalFormProps> = ({ onAddAnimal }) => {
     const [name, setName] = useState('');
     const [breed, setBreed] = useState('');
+    const [subType, setSubType] = useState('');
     const [age, setAge] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [type, setType] = useState<AnimalType>('cattle');
@@ -18,6 +19,7 @@ export const AddAnimalForm: React.FC<AddAnimalFormProps> = ({ onAddAnimal }) => 
             onAddAnimal({ 
                 name, 
                 breed, 
+                subType,
                 age: parseInt(age), 
                 imageUrl, 
                 type, 
@@ -26,6 +28,7 @@ export const AddAnimalForm: React.FC<AddAnimalFormProps> = ({ onAddAnimal }) => 
             // Reset form
             setName('');
             setBreed('');
+            setSubType('');
             setAge('');
             setImageUrl('');
             setType('cattle');
@@ -74,6 +77,19 @@ export const AddAnimalForm: React.FC<AddAnimalFormProps> = ({ onAddAnimal }) => 
                     className="w-full p-2 rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-primary focus:border-primary"
                     placeholder="مثال: هولشتاين"
                     required
+                />
+            </div>
+            <div>
+                <label htmlFor="subType" className="block text-sm font-medium text-text-light-secondary dark:text-dark-secondary mb-1">
+                    النوع الفرعي (اختياري)
+                </label>
+                <input
+                    id="subType"
+                    type="text"
+                    value={subType}
+                    onChange={(e) => setSubType(e.target.value)}
+                    className="w-full p-2 rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-primary focus:border-primary"
+                    placeholder={type === 'cattle' ? "مثال: عجل، بقرة حلوب..." : "مثال: سدسة، رباعي، علوشة..."}
                 />
             </div>
             <div>

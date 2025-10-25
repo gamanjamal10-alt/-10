@@ -45,6 +45,7 @@ export interface Animal {
     healthStatus: 'Healthy' | 'Sick' | 'Under Observation';
     imageUrl: string;
     type: AnimalType;
+    subType?: string;
 }
 
 export interface FarmEvent {

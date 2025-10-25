@@ -32,7 +32,7 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({ animal, onClick }) => {
                     <p className="font-bold text-text-light-primary dark:text-dark-primary">{animal.name}</p>
                     <span className="text-sm text-text-light-secondary dark:text-dark-secondary">#{animal.id}</span>
                 </div>
-                <p className="text-sm text-text-light-secondary dark:text-dark-secondary">{animal.breed} - {animal.age} سنوات</p>
+                <p className="text-sm text-text-light-secondary dark:text-dark-secondary">{animal.breed}{animal.subType ? ` - ${animal.subType}` : ''} - {animal.age} سنوات</p>
                 <div className="mt-2">
                     <HealthStatusBadge status={animal.healthStatus} />
                 </div>

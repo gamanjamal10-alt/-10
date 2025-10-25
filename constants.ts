@@ -54,15 +54,16 @@ export const ALERTS_DATA: Alert[] = [
 ];
 
 const CATTLE_DATA: Animal[] = [
-    { id: '112', name: 'لؤلؤة', breed: 'هولشتاين', age: 4, healthStatus: 'Under Observation', imageUrl: 'https://images.unsplash.com/photo-1570042707108-667677599142?q=80&w=2070&auto=format&fit=crop', type: 'cattle' },
-    { id: '115', name: 'نجمة', breed: 'هولشتاين', age: 5, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1549470947-3a6a11a8a2a3?q=80&w=1974&auto=format&fit=crop', type: 'cattle' },
-    { id: '118', name: 'سحابة', breed: 'جيرسي', age: 3, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1596733431227-882a1f1d9313?q=80&w=1964&auto=format&fit=crop', type: 'cattle' },
-    { id: '120', name: 'زمردة', breed: 'هولشتاين', age: 6, healthStatus: 'Sick', imageUrl: 'https://images.unsplash.com/photo-1527482797592-a63e0204618e?q=80&w=2070&auto=format&fit=crop', type: 'cattle' },
+    { id: '112', name: 'لؤلؤة', breed: 'هولشتاين', subType: 'بقرة', age: 4, healthStatus: 'Under Observation', imageUrl: 'https://images.unsplash.com/photo-1570042707108-667677599142?q=80&w=2070&auto=format&fit=crop', type: 'cattle' },
+    { id: '115', name: 'نجمة', breed: 'هولشتاين', subType: 'بقرة', age: 5, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1549470947-3a6a11a8a2a3?q=80&w=1974&auto=format&fit=crop', type: 'cattle' },
+    { id: '118', name: 'سحابة', breed: 'جيرسي', subType: 'عجل', age: 1, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1596733431227-882a1f1d9313?q=80&w=1964&auto=format&fit=crop', type: 'cattle' },
+    { id: '120', name: 'زمردة', breed: 'هولشتاين', subType: 'بقرة', age: 6, healthStatus: 'Sick', imageUrl: 'https://images.unsplash.com/photo-1527482797592-a63e0204618e?q=80&w=2070&auto=format&fit=crop', type: 'cattle' },
 ];
 
 const SHEEP_DATA: Animal[] = [
-    { id: 'S01', name: 'صوفي', breed: 'عسافي', age: 2, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1593463527599-a0364de015c9?q=80&w=1964&auto=format&fit=crop', type: 'sheep' },
-    { id: 'S02', name: 'بدر', breed: 'نجدي', age: 3, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1589928383350-1e51b11a985a?q=80&w=2070&auto=format&fit=crop', type: 'sheep' },
+    { id: 'S01', name: 'صوفي', breed: 'عسافي', subType: 'سدسة', age: 2, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1593463527599-a0364de015c9?q=80&w=1964&auto=format&fit=crop', type: 'sheep' },
+    { id: 'S02', name: 'بدر', breed: 'نجدي', subType: 'رباعي', age: 3, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1589928383350-1e51b11a985a?q=80&w=2070&auto=format&fit=crop', type: 'sheep' },
+    { id: 'S03', name: 'غيمة', breed: 'عسافي', subType: 'علوشة', age: 1, healthStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1511117775535-629535a882ce?q=80&w=2070&auto=format&fit=crop', type: 'sheep' },
 ];
 
 export const HERD_DATA: Animal[] = [...CATTLE_DATA, ...SHEEP_DATA];
@@ -73,4 +74,5 @@ export const EVENTS_DATA: FarmEvent[] = [
     { id: 2, animalId: '120', date: '20 يوليو 2024', type: 'vet_check', description: 'فحص بيطري، تم تشخيص حمى الحليب.' },
     { id: 3, animalId: '120', date: '22 يوليو 2024', type: 'note', description: 'الحالة الصحية تتحسن بعد العلاج.' },
     { id: 4, animalId: 'S01', date: '10 مايو 2024', type: 'birth', description: 'ولادة توأم من الحملان.' },
+    { id: 5, animalId: 'S02', date: '25 يوليو 2024', type: 'birth', description: 'ولادة خروف بصحة جيدة.' },
 ];
