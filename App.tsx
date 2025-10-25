@@ -11,7 +11,7 @@ import type { Stat } from './types';
 
 const App: React.FC = () => {
   return (
-    <div className="dark relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden pb-24 bg-background-light dark:bg-background-dark">
+    <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden pb-24 bg-background-light dark:bg-background-dark">
       <TopAppBar />
 
       {/* Stats */}
