@@ -1,129 +1,124 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AnimalCard } from '../components/AnimalCard';
 import { Modal } from '../components/Modal';
-import type { Animal, AnimalType, FarmEvent } from '../types';
+import type { Animal, FarmEvent, AnimalType } from '../types';
 
 interface HerdPageProps {
     herd: Animal[];
     events: FarmEvent[];
+    onEditImage: (animal: Animal) => void;
 }
 
-const EventLog: React.FC<{ events: FarmEvent[] }> = ({ events }) => {
-    if (events.length === 0) {
-        return <p className="text-sm text-text-light-secondary dark:text-dark-secondary">لا توجد أحداث مسجلة لهذا الحيوان.</p>;
-    }
-
-    const eventIcons = {
-        birth: 'child_care',
-        vet_check: 'vaccines',
-        note: 'description'
-    };
-
-    return (
-        <div className="space-y-3 pt-4 mt-4 border-t border-border-light dark:border-border-dark">
-             <h4 className="font-bold">سجل الأحداث</h4>
-            {events.map(event => (
-                <div key={event.id} className="flex items-start gap-3 p-2 rounded-md bg-background-light dark:bg-background-dark">
-                    <span className="material-symbols-outlined text-primary mt-1">{eventIcons[event.type]}</span>
-                    <div>
-                        <p className="font-semibold text-text-light-primary dark:text-dark-primary">{event.description}</p>
-                        <p className="text-xs text-text-light-secondary dark:text-dark-secondary">{event.date}</p>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-};
-
-const NewbornEventCard: React.FC<{ event: FarmEvent, parent?: Animal }> = ({ event, parent }) => (
-    <div className="flex items-center gap-4 p-3 rounded-lg bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark">
-         <img 
-            src={parent?.imageUrl || 'https://images.unsplash.com/photo-1549470947-3a6a11a8a2a3?q=80&w=1974&auto=format&fit=crop'} 
-            alt={parent?.name} 
-            className="w-16 h-16 object-cover rounded-md"
-        />
-        <div className="flex-1">
-            <p className="font-semibold text-text-light-primary dark:text-dark-primary">{event.description}</p>
-            {parent && <p className="text-sm text-text-light-secondary dark:text-dark-secondary">الأم: {parent.name} (#{parent.id})</p>}
-            <p className="text-sm text-text-light-secondary dark:text-dark-secondary">التاريخ: {event.date}</p>
-        </div>
-    </div>
+const FilterButton: React.FC<{ label: string; isActive: boolean; onClick: () => void; }> = ({ label, isActive, onClick }) => (
+    <button
+        onClick={onClick}
+        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            isActive ? 'bg-primary text-white' : 'bg-background-light dark:bg-background-dark text-text-light-secondary dark:text-dark-secondary'
+        }`}
+    >
+        {label}
+    </button>
 );
 
-export const HerdPage: React.FC<HerdPageProps> = ({ herd, events }) => {
+export const HerdPage: React.FC<HerdPageProps> = ({ herd, events, onEditImage }) => {
+    const [filter, setFilter] = useState<'all' | AnimalType>('all');
+    const [searchTerm, setSearchTerm] = useState('');
     const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<AnimalType | 'newborns'>('cattle');
+
+    const filteredHerd = useMemo(() => {
+        return herd
+            .filter(animal => filter === 'all' || animal.type === filter)
+            .filter(animal =>
+                animal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                animal.id.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+    }, [herd, filter, searchTerm]);
 
     const handleAnimalClick = (animal: Animal) => {
         setSelectedAnimal(animal);
-        setIsModalOpen(true);
     };
 
     const closeModal = () => {
-        setIsModalOpen(false);
         setSelectedAnimal(null);
     };
     
-    const filteredAnimals = herd.filter(animal => animal.type === activeTab);
-    const animalEvents = selectedAnimal ? events.filter(event => event.animalId === selectedAnimal.id) : [];
-    const birthEvents = events.filter(event => event.type === 'birth').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const animalEvents = useMemo(() => {
+        if (!selectedAnimal) return [];
+        return events.filter(event => event.animalId === selectedAnimal.id)
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [selectedAnimal, events]);
 
     return (
         <div className="p-4 space-y-4">
-             {/* Tabs */}
-            <div className="flex p-1 rounded-lg bg-background-light dark:bg-card-dark border border-border-light dark:border-border-dark">
-                <button 
-                    onClick={() => setActiveTab('cattle')} 
-                    className={`flex-1 p-2 rounded-md text-sm font-semibold transition-colors ${activeTab === 'cattle' ? 'bg-primary text-white' : 'text-text-light-secondary dark:text-dark-secondary'}`}
-                >
-                    الأبقار
-                </button>
-                <button 
-                    onClick={() => setActiveTab('sheep')}
-                    className={`flex-1 p-2 rounded-md text-sm font-semibold transition-colors ${activeTab === 'sheep' ? 'bg-primary text-white' : 'text-text-light-secondary dark:text-dark-secondary'}`}
-                >
-                    الأغنام
-                </button>
-                <button 
-                    onClick={() => setActiveTab('newborns')}
-                    className={`flex-1 p-2 rounded-md text-sm font-semibold transition-colors ${activeTab === 'newborns' ? 'bg-primary text-white' : 'text-text-light-secondary dark:text-dark-secondary'}`}
-                >
-                    المواليد الجدد
-                </button>
+            {/* Search and Filter */}
+            <div className="sticky top-16 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm py-3 z-10">
+                 <div className="relative">
+                    <input
+                        type="text"
+                        placeholder="ابحث بالاسم أو الرقم التعريفي..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full p-2 pl-10 rounded-md bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark focus:ring-primary focus:border-primary text-text-light-primary dark:text-dark-primary"
+                    />
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-secondary dark:text-dark-secondary">
+                        search
+                    </span>
+                </div>
+                <div className="flex justify-center gap-2 mt-3">
+                    <FilterButton label="الكل" isActive={filter === 'all'} onClick={() => setFilter('all')} />
+                    <FilterButton label="الأبقار" isActive={filter === 'cattle'} onClick={() => setFilter('cattle')} />
+                    <FilterButton label="الأغنام" isActive={filter === 'sheep'} onClick={() => setFilter('sheep')} />
+                </div>
             </div>
-            
-            {activeTab !== 'newborns' ? (
-                <div className="space-y-3">
-                    <h2 className="text-lg font-bold text-text-light-primary dark:text-dark-primary px-2">
-                        قائمة {activeTab === 'cattle' ? 'الأبقار' : 'الأغنام'} ({filteredAnimals.length})
-                    </h2>
-                    {filteredAnimals.map(animal => (
+
+            {/* Herd List */}
+            <div className="flex flex-col gap-3 pb-4">
+                {filteredHerd.length > 0 ? (
+                    filteredHerd.map(animal => (
                         <AnimalCard key={animal.id} animal={animal} onClick={handleAnimalClick} />
-                    ))}
-                </div>
-            ) : (
-                 <div className="space-y-3">
-                    <h2 className="text-lg font-bold text-text-light-primary dark:text-dark-primary px-2">
-                        سجل المواليد الجدد ({birthEvents.length})
-                    </h2>
-                    {birthEvents.map(event => {
-                        const parent = herd.find(animal => animal.id === event.animalId);
-                        return <NewbornEventCard key={event.id} event={event} parent={parent} />;
-                    })}
-                </div>
-            )}
+                    ))
+                ) : (
+                    <p className="text-center text-text-light-secondary dark:text-dark-secondary mt-8">
+                       لم يتم العثور على حيوانات تطابق بحثك.
+                    </p>
+                )}
+            </div>
 
-
-            <Modal isOpen={isModalOpen} onClose={closeModal} title={`تفاصيل: ${selectedAnimal?.name ?? ''}`}>
+            {/* Animal Details Modal */}
+            <Modal isOpen={!!selectedAnimal} onClose={closeModal} title={`تفاصيل ${selectedAnimal?.name || ''}`}>
                 {selectedAnimal && (
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                         <img src={selectedAnimal.imageUrl} alt={selectedAnimal.name} className="w-full h-48 object-cover rounded-lg mb-4" />
                         <p><strong className="font-semibold">الرقم التعريفي:</strong> #{selectedAnimal.id}</p>
-                        <p><strong className="font-semibold">السلالة:</strong> {selectedAnimal.breed}{selectedAnimal.subType ? ` - ${selectedAnimal.subType}` : ''}</p>
+                        <p><strong className="font-semibold">السلالة:</strong> {selectedAnimal.breed}</p>
                         <p><strong className="font-semibold">العمر:</strong> {selectedAnimal.age} سنوات</p>
                         <p><strong className="font-semibold">الحالة الصحية:</strong> {selectedAnimal.healthStatus}</p>
-                        <EventLog events={animalEvents} />
+                        
+                         <button 
+                            onClick={() => {
+                                onEditImage(selectedAnimal);
+                                closeModal();
+                            }}
+                            className="w-full flex items-center justify-center gap-2 mt-2 px-4 py-2 rounded-md border border-primary text-primary hover:bg-primary/10 transition-colors"
+                        >
+                             <span className="material-symbols-outlined">edit</span>
+                            تعديل الصورة بالذكاء الاصطناعي
+                        </button>
+
+                        <div className="border-t border-border-light dark:border-border-dark pt-4 mt-4">
+                             <h4 className="font-bold mb-2">السجل الصحي</h4>
+                             {animalEvents.length > 0 ? (
+                                <ul className="space-y-2">
+                                    {animalEvents.map(event => (
+                                        <li key={event.id} className="text-sm p-2 bg-background-light dark:bg-background-dark rounded-md">
+                                            <p className="font-semibold">{event.date}: <span className="font-normal">{event.description}</span></p>
+                                        </li>
+                                    ))}
+                                </ul>
+                             ) : (
+                                <p className="text-sm text-text-light-secondary dark:text-dark-secondary">لا توجد سجلات.</p>
+                             )}
+                        </div>
                     </div>
                 )}
             </Modal>
