@@ -5,7 +5,7 @@ import { TaskList } from '../components/TaskList';
 import { AlertList } from '../components/AlertList';
 import { Modal } from '../components/Modal';
 import { STATS_DATA, KPI_DATA } from '../constants';
-import type { Task, Alert, Animal } from '../types';
+import type { Task, Alert, Animal, Stat } from '../types';
 
 interface DashboardPageProps {
     tasks: Task[];
@@ -68,22 +68,22 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ tasks, alerts, her
 
     const cattleCount = herd.filter(animal => animal.type === 'cattle').length;
     const sheepCount = herd.filter(animal => animal.type === 'sheep').length;
-    
-    // Dynamic milk production calculation
-    const milkingCows = herd.filter(animal => animal.type === 'cattle' && animal.subType === 'بقرة حلوب').length;
-    const dailyMilkProduction = milkingCows * 25; // Assuming 25 liters per milking cow
+    const milkingCowsCount = herd.filter(animal => animal.type === 'cattle' && animal.subType === 'بقرة حلوب').length;
+    const dailyMilkProduction = milkingCowsCount * 25; // Assuming 25 liters per milking cow
 
-    const dynamicStats = [
+    const stats: Stat[] = [
         { title: 'عدد الأبقار', value: `${cattleCount} رأس`, icon: 'pets' },
         { title: 'عدد الأغنام', value: `${sheepCount} رأس`, icon: 'pets' },
-        ...STATS_DATA.map(s => ({...s, value: s.title === 'إنتاج الحليب اليومي' ? `${dailyMilkProduction.toLocaleString()} لتر` : s.title === 'حالات مرضية' ? '3 حالات' : '1 حالة' }))
+        { title: 'حالات مرضية', value: `${herd.filter(a => a.healthStatus === 'Sick').length} حالات`, color: 'warning', icon: 'sick' },
+        { title: 'تنبيهات حرجة', value: `${alerts.filter(a => a.type === 'danger').length} حالة`, color: 'danger', icon: 'warning' },
+        { title: 'إنتاج الحليب اليومي', value: `${dailyMilkProduction.toLocaleString()} لتر`, icon: 'science' },
     ];
     
     return (
         <div className="p-4 space-y-6">
             {/* Stats Section */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {dynamicStats.map(stat => <StatCard key={stat.title} {...stat} />)}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {stats.map(stat => <StatCard key={stat.title} {...stat} />)}
             </div>
 
             {/* KPI Section */}

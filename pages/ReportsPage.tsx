@@ -24,7 +24,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ tasks, herd }) => {
         { name: 'مكتملة', value: completedTasks },
         { name: 'قيد التنفيذ', value: pendingTasks },
     ];
-    const TASK_PIE_COLORS = ['#22C55E', '#9CA3AF'];
+    const TASK_PIE_COLORS = ['#6366F1', '#9CA3AF'];
 
     // Herd Health Analytics Data
     const healthStatusCounts = herd.reduce((acc, animal) => {
