@@ -12,7 +12,9 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({ onAddTask }) => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (title.trim() && dueDate.trim()) {
-            onAddTask({ title, dueDate, completed: false });
+            // FIX: The `completed` property is handled by the parent component and is not expected here.
+            // Removing `completed: false` to match the `Omit<Task, 'id' | 'priority' | 'completed'>` type.
+            onAddTask({ title, dueDate });
             setTitle('');
             setDueDate('');
         }
