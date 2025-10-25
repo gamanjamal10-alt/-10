@@ -150,6 +150,26 @@ const App = () => {
         setIsEditStatModalOpen(false);
     };
 
+    // --- Delete Handlers ---
+    const handleDeleteTask = (taskId: number) => {
+        if (window.confirm('هل أنت متأكد من أنك تريد حذف هذه المهمة؟')) {
+            setTasks(prev => prev.filter(task => task.id !== taskId));
+        }
+    };
+    
+    const handleDeleteAnimal = (animalId: string) => {
+        if (window.confirm('هل أنت متأكد من أنك تريد حذف هذا الحيوان؟ سيتم حذف جميع سجلاته.')) {
+            setHerd(prev => prev.filter(animal => animal.id !== animalId));
+        }
+    };
+    
+    const handleDeleteShepherd = (shepherdId: number) => {
+        if (window.confirm('هل أنت متأكد من أنك تريد حذف هذا الراعي؟')) {
+            setShepherds(prev => prev.filter(shepherd => shepherd.id !== shepherdId));
+        }
+    };
+
+
     // Render logic
     const renderPage = () => {
         switch (activePage) {
@@ -160,18 +180,19 @@ const App = () => {
                     tasks={tasks}
                     alerts={alerts}
                     onToggleTask={handleToggleTask}
+                    onDeleteTask={handleDeleteTask}
                     onViewAllTasks={() => setActivePage('tasks')}
                     onViewAllAlerts={() => { /* Can be implemented later */ }}
                     onStatClick={handleOpenEditStatModal}
                 />;
             case 'herd':
-                return <HerdPage herd={herd} events={farmEvents} onEditImage={handleOpenImageEditor} />;
+                return <HerdPage herd={herd} events={farmEvents} onEditImage={handleOpenImageEditor} onDeleteAnimal={handleDeleteAnimal} />;
             case 'tasks':
-                return <TasksPage tasks={tasks} onToggleTask={handleToggleTask} />;
+                return <TasksPage tasks={tasks} onToggleTask={handleToggleTask} onDeleteTask={handleDeleteTask} />;
             case 'reports':
                 return <ReportsPage tasks={tasks} herd={herd} />;
             case 'shepherds':
-                return <ShepherdsPage shepherds={shepherds} />;
+                return <ShepherdsPage shepherds={shepherds} onDeleteShepherd={handleDeleteShepherd} />;
             default:
                 return <DashboardPage
                     stats={dynamicStats}
@@ -179,6 +200,7 @@ const App = () => {
                     tasks={tasks}
                     alerts={alerts}
                     onToggleTask={handleToggleTask}
+                    onDeleteTask={handleDeleteTask}
                     onViewAllTasks={() => setActivePage('tasks')}
                     onViewAllAlerts={() => { /* Can be implemented later */ }}
                     onStatClick={handleOpenEditStatModal}

@@ -4,9 +4,10 @@ import type { Shepherd } from '../types';
 
 interface ShepherdCardProps {
     shepherd: Shepherd;
+    onDelete: (id: number) => void;
 }
 
-const ShepherdCard: React.FC<ShepherdCardProps> = ({ shepherd }) => (
+const ShepherdCard: React.FC<ShepherdCardProps> = ({ shepherd, onDelete }) => (
     <div className="flex items-center gap-4 p-3 rounded-lg bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark">
         <img 
             src={shepherd.imageUrl} 
@@ -18,18 +19,24 @@ const ShepherdCard: React.FC<ShepherdCardProps> = ({ shepherd }) => (
             <p className="text-sm text-text-light-secondary dark:text-dark-secondary">{shepherd.specialty}</p>
             <p className="text-sm text-text-light-secondary dark:text-dark-secondary mt-1">{shepherd.phone}</p>
         </div>
-        <a href={`tel:${shepherd.phone}`} className="p-2 rounded-full hover:bg-primary/10 text-primary transition-colors">
-            <span className="material-symbols-outlined">call</span>
-        </a>
+        <div className="flex items-center">
+            <a href={`tel:${shepherd.phone}`} className="p-2 rounded-full hover:bg-primary/10 text-primary transition-colors">
+                <span className="material-symbols-outlined">call</span>
+            </a>
+             <button onClick={() => onDelete(shepherd.id)} className="p-2 rounded-full hover:bg-danger/10 text-danger transition-colors">
+                <span className="material-symbols-outlined">delete</span>
+            </button>
+        </div>
     </div>
 );
 
 
 interface ShepherdsPageProps {
     shepherds: Shepherd[];
+    onDeleteShepherd: (id: number) => void;
 }
 
-export const ShepherdsPage: React.FC<ShepherdsPageProps> = ({ shepherds }) => {
+export const ShepherdsPage: React.FC<ShepherdsPageProps> = ({ shepherds, onDeleteShepherd }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredShepherds = shepherds.filter(shepherd =>
@@ -57,7 +64,7 @@ export const ShepherdsPage: React.FC<ShepherdsPageProps> = ({ shepherds }) => {
             <div className="flex flex-col gap-3 pb-4">
                 {filteredShepherds.length > 0 ? (
                     filteredShepherds.map(shepherd => (
-                        <ShepherdCard key={shepherd.id} shepherd={shepherd} />
+                        <ShepherdCard key={shepherd.id} shepherd={shepherd} onDelete={onDeleteShepherd} />
                     ))
                 ) : (
                     <p className="text-center text-text-light-secondary dark:text-dark-secondary mt-8">

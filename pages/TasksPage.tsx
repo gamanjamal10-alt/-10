@@ -6,9 +6,10 @@ import type { Task } from '../types';
 interface TasksPageProps {
     tasks: Task[];
     onToggleTask: (taskId: number) => void;
+    onDeleteTask: (taskId: number) => void;
 }
 
-export const TasksPage: React.FC<TasksPageProps> = ({ tasks, onToggleTask }) => {
+export const TasksPage: React.FC<TasksPageProps> = ({ tasks, onToggleTask, onDeleteTask }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
@@ -36,15 +37,26 @@ export const TasksPage: React.FC<TasksPageProps> = ({ tasks, onToggleTask }) => 
                             <p className="mb-2"><strong className="font-semibold">الحالة:</strong> {selectedTask.completed ? 'مكتملة' : 'قيد التنفيذ'}</p>
                             {selectedTask.description && <p><strong className="font-semibold">الوصف:</strong> {selectedTask.description}</p>}
                         </div>
-                        <button 
-                            onClick={() => {
-                                onToggleTask(selectedTask.id);
-                                closeModal();
-                            }} 
-                            className="w-full px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors"
-                        >
-                            {selectedTask.completed ? 'وضع علامة كغير مكتملة' : 'وضع علامة كمكتملة'}
-                        </button>
+                        <div className="space-y-2 pt-2">
+                            <button 
+                                onClick={() => {
+                                    onToggleTask(selectedTask.id);
+                                    closeModal();
+                                }} 
+                                className="w-full px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors"
+                            >
+                                {selectedTask.completed ? 'وضع علامة كغير مكتملة' : 'وضع علامة كمكتملة'}
+                            </button>
+                             <button 
+                                onClick={() => {
+                                    onDeleteTask(selectedTask.id);
+                                    closeModal();
+                                }} 
+                                className="w-full px-4 py-2 rounded-md border border-danger text-danger hover:bg-danger/10 transition-colors"
+                            >
+                                حذف المهمة
+                            </button>
+                        </div>
                     </div>
                 )}
             </Modal>

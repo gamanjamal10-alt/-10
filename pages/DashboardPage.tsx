@@ -16,6 +16,7 @@ interface DashboardPageProps {
     tasks: Task[];
     alerts: Alert[];
     onToggleTask: (taskId: number) => void;
+    onDeleteTask: (taskId: number) => void;
     onViewAllTasks: () => void;
     onViewAllAlerts: () => void;
     onStatClick: (stat: Stat) => void;
@@ -27,6 +28,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     tasks,
     alerts,
     onToggleTask,
+    onDeleteTask,
     onViewAllTasks,
     onViewAllAlerts,
     onStatClick,
@@ -69,7 +71,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <TaskList
                 title="المهام القادمة"
                 tasks={upcomingTasks}
-                // FIX: Corrected invalid prop name 'onTask-Click' to 'onTaskClick'
                 onTaskClick={handleTaskClick}
                 onToggleTask={onToggleTask}
                 onViewAllClick={onViewAllTasks}
@@ -93,15 +94,26 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                             <p className="mb-2"><strong className="font-semibold">الأولوية:</strong> {selectedTask.priority === 'high' ? 'عالية' : 'عادية'}</p>
                              {selectedTask.description && <p><strong className="font-semibold">الوصف:</strong> {selectedTask.description}</p>}
                         </div>
-                        <button 
-                            onClick={() => {
-                                onToggleTask(selectedTask.id);
-                                closeTaskModal();
-                            }} 
-                            className="w-full px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors"
-                        >
-                            {selectedTask.completed ? 'وضع علامة كغير مكتملة' : 'وضع علامة كمكتملة'}
-                        </button>
+                        <div className="space-y-2 pt-2">
+                             <button 
+                                onClick={() => {
+                                    onToggleTask(selectedTask.id);
+                                    closeTaskModal();
+                                }} 
+                                className="w-full px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors"
+                            >
+                                {selectedTask.completed ? 'وضع علامة كغير مكتملة' : 'وضع علامة كمكتملة'}
+                            </button>
+                             <button 
+                                onClick={() => {
+                                    onDeleteTask(selectedTask.id);
+                                    closeTaskModal();
+                                }} 
+                                className="w-full px-4 py-2 rounded-md border border-danger text-danger hover:bg-danger/10 transition-colors"
+                            >
+                                حذف المهمة
+                            </button>
+                        </div>
                     </div>
                 )}
             </Modal>

@@ -7,6 +7,7 @@ interface HerdPageProps {
     herd: Animal[];
     events: FarmEvent[];
     onEditImage: (animal: Animal) => void;
+    onDeleteAnimal: (animalId: string) => void;
 }
 
 const FilterButton: React.FC<{ label: string; isActive: boolean; onClick: () => void; }> = ({ label, isActive, onClick }) => (
@@ -20,7 +21,7 @@ const FilterButton: React.FC<{ label: string; isActive: boolean; onClick: () => 
     </button>
 );
 
-export const HerdPage: React.FC<HerdPageProps> = ({ herd, events, onEditImage }) => {
+export const HerdPage: React.FC<HerdPageProps> = ({ herd, events, onEditImage, onDeleteAnimal }) => {
     const [filter, setFilter] = useState<'all' | AnimalType | 'newborns'>('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
@@ -101,16 +102,27 @@ export const HerdPage: React.FC<HerdPageProps> = ({ herd, events, onEditImage })
                         <p><strong className="font-semibold">العمر:</strong> {selectedAnimal.age} سنوات</p>
                         <p><strong className="font-semibold">الحالة الصحية:</strong> {selectedAnimal.healthStatus}</p>
                         
-                         <button 
-                            onClick={() => {
-                                onEditImage(selectedAnimal);
-                                closeModal();
-                            }}
-                            className="w-full flex items-center justify-center gap-2 mt-2 px-4 py-2 rounded-md border border-primary text-primary hover:bg-primary/10 transition-colors"
-                        >
-                             <span className="material-symbols-outlined">edit</span>
-                            تعديل الصورة بالذكاء الاصطناعي
-                        </button>
+                         <div className="space-y-2 pt-2">
+                             <button 
+                                onClick={() => {
+                                    onEditImage(selectedAnimal);
+                                    closeModal();
+                                }}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md border border-primary text-primary hover:bg-primary/10 transition-colors"
+                            >
+                                 <span className="material-symbols-outlined">edit</span>
+                                تعديل الصورة بالذكاء الاصطناعي
+                            </button>
+                             <button 
+                                onClick={() => {
+                                    onDeleteAnimal(selectedAnimal.id);
+                                    closeModal();
+                                }} 
+                                className="w-full px-4 py-2 rounded-md border border-danger text-danger hover:bg-danger/10 transition-colors"
+                            >
+                                حذف الحيوان
+                            </button>
+                        </div>
 
                         <div className="border-t border-border-light dark:border-border-dark pt-4 mt-4">
                              <h4 className="font-bold mb-2">السجل الصحي</h4>
