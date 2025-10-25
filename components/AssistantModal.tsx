@@ -4,8 +4,6 @@ import { Modal } from './Modal';
 import Markdown from 'react-markdown';
 import type { Task, Alert, Animal } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
-
 interface Message {
     role: 'user' | 'model';
     parts: string;
@@ -28,6 +26,7 @@ export const AssistantModal: React.FC<AssistantModalProps> = ({ isOpen, onClose,
     const [error, setError] = useState<string | null>(null);
     const chatRef = useRef<Chat | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
+    const aiRef = useRef<GoogleGenAI | null>(null);
 
     const generateContext = () => {
         // Add completion status to tasks for better context
@@ -42,9 +41,17 @@ export const AssistantModal: React.FC<AssistantModalProps> = ({ isOpen, onClose,
         - Herd Status: ${JSON.stringify(appData.herd)}
         `;
     };
+    
+    const getAiClient = () => {
+        if (!aiRef.current) {
+            aiRef.current = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+        }
+        return aiRef.current;
+    };
 
     useEffect(() => {
         if (isOpen) {
+            const ai = getAiClient();
             chatRef.current = ai.chats.create({
                 model: 'gemini-2.5-flash',
                 config: {
@@ -66,6 +73,7 @@ export const AssistantModal: React.FC<AssistantModalProps> = ({ isOpen, onClose,
         setIsLoading(true);
         setError(null);
         try {
+            const ai = getAiClient();
             const context = generateContext();
             const summaryPrompt = "قدم لي ملخصًا صباحيًا موجزًا عن حالة المزرعة اليوم بناءً على هذه البيانات. سلط الضوء على أهم 3 نقاط تتطلب انتباهي، مع الأخذ في الاعتبار المهام المكتملة وغير المكتملة.";
             
