@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { TopAppBar } from './components/TopAppBar';
-import { StatCard } from './components/StatCard';
-import { KpiCard } from './components/KpiCard';
-import { TaskList } from './components/TaskList';
-import { AlertList } from './components/AlertList';
 import { FloatingActionButton } from './components/FloatingActionButton';
 import { BottomNavBar } from './components/BottomNavBar';
 import { Modal } from './components/Modal';
-import { STATS_DATA, UPCOMING_TASKS, RECENT_ALERTS, KPI_DATA } from './constants';
-import type { Stat, Task, Alert } from './types';
+import { DashboardPage } from './pages/DashboardPage';
+import { HerdPage } from './pages/HerdPage';
+import { TasksPage } from './pages/TasksPage';
+import { ReportsPage } from './pages/ReportsPage';
+import type { Task, Alert } from './types';
 
 const App: React.FC = () => {
   const [modalContent, setModalContent] = useState<{ title: string; body: string } | null>(null);
+  const [activePage, setActivePage] = useState('لوحة القيادة');
 
   const handleShowDetails = (item: Task | Alert) => {
     setModalContent({
@@ -43,31 +43,36 @@ const App: React.FC = () => {
   }
 
   const closeModal = () => setModalContent(null);
+  
+  const renderPage = () => {
+    switch (activePage) {
+      case 'القطيع':
+        return <HerdPage />;
+      case 'المهام':
+        return <TasksPage />;
+      case 'التقارير':
+        return <ReportsPage />;
+      case 'لوحة القيادة':
+      default:
+        return <DashboardPage 
+                  onTaskClick={handleShowDetails}
+                  onAlertClick={handleShowDetails}
+                  onViewAllTasks={() => handleViewAll('Tasks')}
+                  onViewAllAlerts={() => handleViewAll('Alerts')}
+                />;
+    }
+  };
 
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden pb-24 bg-background-light dark:bg-background-dark">
       <TopAppBar onNotificationsClick={handleNotificationsClick} />
+      
+      <main className="flex-1 flex flex-col">
+        {renderPage()}
+      </main>
 
-      {/* Stats */}
-      <div className="flex flex-wrap gap-4 p-4">
-        {STATS_DATA.map((stat: Stat) => (
-          <StatCard key={stat.title} title={stat.title} value={stat.value} color={stat.color} />
-        ))}
-      </div>
-
-      {/* Data Visualization Card (KPIs) */}
-      <div className="px-4">
-        <KpiCard kpiData={KPI_DATA} />
-      </div>
-
-      {/* List Cards: Upcoming Tasks & Recent Alerts */}
-      <div className="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TaskList tasks={UPCOMING_TASKS} onTaskClick={handleShowDetails} onViewAllClick={() => handleViewAll('Tasks')} />
-        <AlertList alerts={RECENT_ALERTS} onAlertClick={handleShowDetails} onViewAllClick={() => handleViewAll('Alerts')} />
-      </div>
-
-      <FloatingActionButton onClick={handleFabClick} />
-      <BottomNavBar />
+      {activePage === 'لوحة القيادة' && <FloatingActionButton onClick={handleFabClick} />}
+      <BottomNavBar activeItem={activePage} onNavigate={setActivePage} />
 
       <Modal 
         isOpen={!!modalContent}
