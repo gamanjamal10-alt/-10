@@ -1,6 +1,4 @@
-import React, { useState, useMemo } from 'react';
-
-// Components
+import React, { useState, useCallback } from 'react';
 import { TopAppBar } from './components/TopAppBar';
 import { BottomNavBar } from './components/BottomNavBar';
 import { FloatingActionButton } from './components/FloatingActionButton';
@@ -12,181 +10,166 @@ import { AssistantModal } from './components/AssistantModal';
 import { ImageEditorModal } from './components/ImageEditorModal';
 import { EditStatModal } from './components/EditStatModal';
 
-
-// Pages
 import { DashboardPage } from './pages/DashboardPage';
 import { HerdPage } from './pages/HerdPage';
 import { TasksPage } from './pages/TasksPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ShepherdsPage } from './pages/ShepherdsPage';
 
-// Data and Types
-import type { Page, Task, Animal, Alert, Shepherd, Stat } from './types';
-import { 
-    KPI_DATA, 
-    INITIAL_TASKS, 
-    INITIAL_ALERTS, 
-    INITIAL_HERD, 
-    FARM_EVENTS, 
-    INITIAL_SHEPHERDS,
-    INITIAL_MILK_PRODUCTION,
-    INITIAL_FODDER
-} from './constants';
+import type { Page, Stat, Task, Alert, Animal, Shepherd, FarmEvent } from './types';
+import { STATS_DATA, INITIAL_TASKS, INITIAL_ALERTS, INITIAL_HERD, INITIAL_SHEPHERDS, KPI_DATA, FARM_EVENTS } from './constants';
 
-const App = () => {
-    // State
-    const [activePage, setActivePage] = useState<Page>('dashboard');
+const App: React.FC = () => {
+    const [page, setPage] = useState<Page>('dashboard');
+    const [stats, setStats] = useState<Stat[]>(STATS_DATA.map((s, i) => ({ ...s, id: `stat-${i}` })));
     const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+    const [alerts, setAlerts] = useState<Alert[]>(INITIAL_ALERTS);
     const [herd, setHerd] = useState<Animal[]>(INITIAL_HERD);
     const [shepherds, setShepherds] = useState<Shepherd[]>(INITIAL_SHEPHERDS);
-    
-    // Editable stats state
-    const [milkProduction, setMilkProduction] = useState(INITIAL_MILK_PRODUCTION);
-    const [availableFodder, setAvailableFodder] = useState(INITIAL_FODDER);
-    
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [farmEvents, setFarmEvents] = useState<FarmEvent[]>(FARM_EVENTS);
+
     const [isAssistantModalOpen, setIsAssistantModalOpen] = useState(false);
+    const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
+    const [addItemFormType, setAddItemFormType] = useState<'task' | 'animal' | 'shepherd' | null>(null);
     const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
-    const [animalToEdit, setAnimalToEdit] = useState<Animal | null>(null);
-
-    // New modal state for editing stats
+    const [editingAnimalImage, setEditingAnimalImage] = useState<Animal | null>(null);
     const [isEditStatModalOpen, setIsEditStatModalOpen] = useState(false);
-    const [statToEdit, setStatToEdit] = useState<Stat | null>(null);
+    const [editingStat, setEditingStat] = useState<Stat | null>(null);
+    const [isTaskDetailModalOpen, setIsTaskDetailModalOpen] = useState(false);
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [isAlertDetailModalOpen, setIsAlertDetailModalOpen] = useState(false);
+    const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
 
-    // Memos for derived data
-    const alerts = useMemo(() => INITIAL_ALERTS, []);
-    const kpiData = useMemo(() => KPI_DATA, []);
-    const farmEvents = useMemo(() => FARM_EVENTS, []);
-    
-    const dynamicStats: Stat[] = useMemo(() => {
-        const totalCattle = herd.filter(a => a.type === 'cattle').length;
-        const totalSheep = herd.filter(a => a.type === 'sheep').length;
-        const healthyPercentage = herd.length > 0 ? Math.round((herd.filter(a => a.healthStatus === 'Healthy').length / herd.length) * 100) : 100;
-        const activeAlerts = alerts.length;
 
-        return [
-            { id: 'cattle', title: 'إجمالي الأبقار', value: totalCattle.toString(), icon: 'pets' },
-            { id: 'sheep', title: 'إجمالي الأغنام', value: totalSheep.toString(), icon: 'pets' },
-            { id: 'milk', title: 'إنتاج الحليب (لتر/يوم)', value: milkProduction.toLocaleString(), icon: 'water_drop' },
-            { id: 'health', title: 'الحالة الصحية', value: `${healthyPercentage}% جيد`, icon: 'health_and_safety' },
-            { id: 'fodder', title: 'الأعلاف المتاحة (طن)', value: availableFodder.toString(), icon: 'grass' },
-            { id: 'alerts', title: 'تنبيهات نشطة', value: activeAlerts.toString(), icon: 'notifications_active', color: 'warning' as 'warning' },
-        ];
-    }, [herd, alerts, milkProduction, availableFodder]);
-
-    // Handlers
-    const handleNavigation = (page: Page) => {
-        setActivePage(page);
+    const handleNavigate = (newPage: Page) => {
+        setPage(newPage);
     };
 
-    const handleToggleTask = (taskId: number) => {
+    const handleToggleTask = useCallback((taskId: number) => {
         setTasks(prevTasks =>
             prevTasks.map(task =>
                 task.id === taskId ? { ...task, completed: !task.completed } : task
             )
         );
-    };
+        // Also update in modal if it's open
+        if (selectedTask && selectedTask.id === taskId) {
+            setSelectedTask(prev => prev ? { ...prev, completed: !prev.completed } : null);
+        }
+    }, [selectedTask]);
 
-    const handleAddTask = (taskData: Omit<Task, 'id' | 'completed' | 'priority'>) => {
+    const handleDeleteTask = useCallback((taskId: number) => {
+        setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+    }, []);
+
+    const handleAddTask = useCallback((taskData: Omit<Task, 'id' | 'priority' | 'completed'>) => {
         const newTask: Task = {
             id: Date.now(),
             ...taskData,
             priority: 'normal',
-            completed: false
+            completed: false,
         };
         setTasks(prevTasks => [newTask, ...prevTasks]);
-        setIsAddModalOpen(false);
-    };
+        setIsAddItemModalOpen(false);
+    }, []);
 
-    const handleAddAnimal = (animalData: Omit<Animal, 'id'>) => {
+    const handleDeleteAnimal = useCallback((animalId: string) => {
+        setHerd(prevHerd => prevHerd.filter(animal => animal.id !== animalId));
+    }, []);
+
+
+    const handleAddAnimal = useCallback((animalData: Omit<Animal, 'id'>) => {
         const newAnimal: Animal = {
-            id: `${animalData.type === 'cattle' ? 'C' : 'S'}${Date.now().toString().slice(-4)}`,
+            id: `${animalData.type.charAt(0).toUpperCase()}${Math.floor(Math.random() * 1000)}`,
             ...animalData,
-            imageUrl: animalData.imageUrl || `https://source.unsplash.com/400x400/?${animalData.type}`
         };
         setHerd(prevHerd => [newAnimal, ...prevHerd]);
-        setIsAddModalOpen(false);
+        setIsAddItemModalOpen(false);
+    }, []);
+    
+    const handleUpdateAnimalImage = useCallback((animalId: string, newImageUrl: string) => {
+        setHerd(prevHerd => prevHerd.map(animal => 
+            animal.id === animalId ? { ...animal, imageUrl: newImageUrl } : animal
+        ));
+        setIsImageEditorOpen(false);
+    }, []);
+
+    const handleEditImage = (animal: Animal) => {
+        setEditingAnimalImage(animal);
+        setIsImageEditorOpen(true);
     };
 
-    const handleAddShepherd = (shepherdData: Omit<Shepherd, 'id'>) => {
+    const handleDeleteShepherd = useCallback((shepherdId: number) => {
+        setShepherds(prevShepherds => prevShepherds.filter(s => s.id !== shepherdId));
+    }, []);
+
+    const handleAddShepherd = useCallback((shepherdData: Omit<Shepherd, 'id'>) => {
         const newShepherd: Shepherd = {
             id: Date.now(),
             ...shepherdData,
         };
         setShepherds(prevShepherds => [newShepherd, ...prevShepherds]);
-        setIsAddModalOpen(false);
-    };
-    
-    const handleOpenImageEditor = (animal: Animal) => {
-        setAnimalToEdit(animal);
-        setIsImageEditorOpen(true);
+        setIsAddItemModalOpen(false);
+    }, []);
+
+    const handleFabClick = () => {
+        switch (page) {
+            case 'tasks':
+                setAddItemFormType('task');
+                break;
+            case 'herd':
+                setAddItemFormType('animal');
+                break;
+            case 'shepherds':
+                setAddItemFormType('shepherd');
+                break;
+            default:
+                return;
+        }
+        setIsAddItemModalOpen(true);
     };
 
-    const handleUpdateAnimalImage = (animalId: string, newImageUrl: string) => {
-        setHerd(prevHerd =>
-            prevHerd.map(animal =>
-                animal.id === animalId ? { ...animal, imageUrl: newImageUrl } : animal
-            )
-        );
-        setIsImageEditorOpen(false);
-    };
-    
-    const handleOpenEditStatModal = (stat: Stat) => {
-        if (stat.id === 'milk' || stat.id === 'fodder') {
-            setStatToEdit(stat);
+    const handleUpdateStat = useCallback((statId: string, newValue: string) => {
+        setStats(prevStats => prevStats.map(stat => 
+            stat.id === statId ? { ...stat, value: new Intl.NumberFormat().format(Number(newValue)) } : stat
+        ));
+        setIsEditStatModalOpen(false);
+    }, []);
+
+    const handleStatClick = (stat: Stat) => {
+        // Allow editing for stats with specific titles
+        if (stat.title === 'إنتاج الحليب (لتر/يوم)' || stat.title === 'الأعلاف المتاحة (طن)') {
+            setEditingStat(stat);
             setIsEditStatModalOpen(true);
         }
     };
     
-    const handleUpdateStat = (statId: string, newValue: string) => {
-        const numericValue = parseFloat(newValue);
-        if(isNaN(numericValue)) return;
-
-        if (statId === 'milk') {
-            setMilkProduction(numericValue);
-        } else if (statId === 'fodder') {
-            setAvailableFodder(numericValue);
-        }
-        setIsEditStatModalOpen(false);
-    };
-
-    // --- Delete Handlers ---
-    const handleDeleteTask = (taskId: number) => {
-        if (window.confirm('هل أنت متأكد من أنك تريد حذف هذه المهمة؟')) {
-            setTasks(prev => prev.filter(task => task.id !== taskId));
-        }
+    const openTaskDetails = (task: Task) => {
+        setSelectedTask(task);
+        setIsTaskDetailModalOpen(true);
     };
     
-    const handleDeleteAnimal = (animalId: string) => {
-        if (window.confirm('هل أنت متأكد من أنك تريد حذف هذا الحيوان؟ سيتم حذف جميع سجلاته.')) {
-            setHerd(prev => prev.filter(animal => animal.id !== animalId));
-        }
-    };
-    
-    const handleDeleteShepherd = (shepherdId: number) => {
-        if (window.confirm('هل أنت متأكد من أنك تريد حذف هذا الراعي؟')) {
-            setShepherds(prev => prev.filter(shepherd => shepherd.id !== shepherdId));
-        }
+    const openAlertDetails = (alert: Alert) => {
+        setSelectedAlert(alert);
+        setIsAlertDetailModalOpen(true);
     };
 
 
-    // Render logic
     const renderPage = () => {
-        switch (activePage) {
+        switch (page) {
             case 'dashboard':
                 return <DashboardPage
-                    stats={dynamicStats}
-                    kpiData={kpiData}
-                    tasks={tasks}
-                    alerts={alerts}
-                    onToggleTask={handleToggleTask}
-                    onDeleteTask={handleDeleteTask}
-                    onViewAllTasks={() => setActivePage('tasks')}
-                    onViewAllAlerts={() => { /* Can be implemented later */ }}
-                    onStatClick={handleOpenEditStatModal}
+                    stats={stats}
+                    kpiData={KPI_DATA}
+                    tasks={tasks.filter(t => !t.completed).slice(0, 3)}
+                    alerts={alerts.slice(0, 3)}
+                    onTaskToggle={handleToggleTask}
+                    onNavigate={handleNavigate}
+                    onStatClick={handleStatClick}
+                    onTaskClick={openTaskDetails}
+                    onAlertClick={openAlertDetails}
                 />;
             case 'herd':
-                return <HerdPage herd={herd} events={farmEvents} onEditImage={handleOpenImageEditor} onDeleteAnimal={handleDeleteAnimal} />;
+                return <HerdPage herd={herd} events={farmEvents} onEditImage={handleEditImage} onDeleteAnimal={handleDeleteAnimal}/>;
             case 'tasks':
                 return <TasksPage tasks={tasks} onToggleTask={handleToggleTask} onDeleteTask={handleDeleteTask} />;
             case 'reports':
@@ -194,89 +177,100 @@ const App = () => {
             case 'shepherds':
                 return <ShepherdsPage shepherds={shepherds} onDeleteShepherd={handleDeleteShepherd} />;
             default:
-                return <DashboardPage
-                    stats={dynamicStats}
-                    kpiData={kpiData}
-                    tasks={tasks}
-                    alerts={alerts}
-                    onToggleTask={handleToggleTask}
-                    onDeleteTask={handleDeleteTask}
-                    onViewAllTasks={() => setActivePage('tasks')}
-                    onViewAllAlerts={() => { /* Can be implemented later */ }}
-                    onStatClick={handleOpenEditStatModal}
+                return <DashboardPage 
+                    stats={stats} 
+                    kpiData={KPI_DATA} 
+                    tasks={tasks.filter(t => !t.completed).slice(0, 3)} 
+                    alerts={alerts.slice(0, 3)}
+                    onTaskToggle={handleToggleTask}
+                    onNavigate={handleNavigate}
+                    onStatClick={handleStatClick}
+                    onTaskClick={openTaskDetails}
+                    onAlertClick={openAlertDetails}
                 />;
         }
     };
-    
-    const renderAddForm = () => {
-        switch (activePage) {
-            case 'tasks':
-                return <AddItemForm onAddTask={handleAddTask} />;
-            case 'herd':
-                return <AddAnimalForm onAddAnimal={handleAddAnimal} />;
-            case 'shepherds':
-                 return <AddShepherdForm onAddShepherd={handleAddShepherd} />;
-            default:
-                return null;
+
+    const getAddItemModalTitle = () => {
+        switch (addItemFormType) {
+            case 'task': return 'إضافة مهمة جديدة';
+            case 'animal': return 'إضافة حيوان جديد';
+            case 'shepherd': return 'إضافة راعي جديد';
+            default: return 'إضافة';
         }
     };
 
-    const getAddModalTitle = () => {
-        switch (activePage) {
-            case 'tasks':
-                return 'إضافة مهمة جديدة';
-            case 'herd':
-                return 'إضافة حيوان جديد';
-            case 'shepherds':
-                 return 'إضافة راعي جديد';
-            default:
-                return 'إضافة عنصر';
+    const renderAddItemForm = () => {
+        switch (addItemFormType) {
+            case 'task': return <AddItemForm onAddTask={handleAddTask} />;
+            case 'animal': return <AddAnimalForm onAddAnimal={handleAddAnimal} />;
+            case 'shepherd': return <AddShepherdForm onAddShepherd={handleAddShepherd} />;
+            default: return null;
         }
     };
 
     return (
-        <div className="bg-background-light dark:bg-background-dark min-h-screen font-sans text-text-light-primary dark:text-dark-primary">
+        <div className="bg-background-light dark:bg-background-dark min-h-screen pb-20 pt-16">
             <TopAppBar onAssistantClick={() => setIsAssistantModalOpen(true)} />
-
-            {/* Main content with padding for app bars */}
-            <main className="pt-16 pb-16">
+            
+            <main className="mb-16">
                 {renderPage()}
             </main>
 
-            {/* Show FAB for pages that support adding items */}
-            {['tasks', 'herd', 'shepherds'].includes(activePage) && (
-                <FloatingActionButton onClick={() => setIsAddModalOpen(true)} />
+            {(page === 'tasks' || page === 'herd' || page === 'shepherds') && (
+                <FloatingActionButton onClick={handleFabClick} />
             )}
+            
+            <BottomNavBar activePage={page} onNavigate={handleNavigate} />
 
-            <BottomNavBar activePage={activePage} onNavigate={handleNavigation} />
-            
-            {/* Add Item Modal */}
-            <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title={getAddModalTitle()}>
-                {renderAddForm()}
-            </Modal>
-            
-            {/* AI Assistant Modal */}
-            <AssistantModal
-                isOpen={isAssistantModalOpen}
+            <AssistantModal 
+                isOpen={isAssistantModalOpen} 
                 onClose={() => setIsAssistantModalOpen(false)}
                 appData={{ tasks, alerts, herd }}
             />
+
+            <Modal 
+                isOpen={isAddItemModalOpen} 
+                onClose={() => setIsAddItemModalOpen(false)} 
+                title={getAddItemModalTitle()}
+            >
+                {renderAddItemForm()}
+            </Modal>
             
-            {/* Image Editor Modal */}
             <ImageEditorModal
                 isOpen={isImageEditorOpen}
                 onClose={() => setIsImageEditorOpen(false)}
-                animal={animalToEdit}
+                animal={editingAnimalImage}
                 onUpdateAnimalImage={handleUpdateAnimalImage}
             />
             
-             {/* Edit Stat Modal */}
             <EditStatModal
                 isOpen={isEditStatModalOpen}
                 onClose={() => setIsEditStatModalOpen(false)}
-                stat={statToEdit}
+                stat={editingStat}
                 onUpdate={handleUpdateStat}
             />
+
+            <Modal isOpen={isTaskDetailModalOpen} onClose={() => setIsTaskDetailModalOpen(false)} title="تفاصيل المهمة">
+                {selectedTask && (
+                     <div className="space-y-4">
+                        <p><strong className="font-semibold">المهمة:</strong> {selectedTask.title}</p>
+                        <p><strong className="font-semibold">الموعد النهائي:</strong> {selectedTask.dueDate}</p>
+                        <p><strong className="font-semibold">الأولوية:</strong> {selectedTask.priority === 'high' ? 'عالية' : 'عادية'}</p>
+                         <p><strong className="font-semibold">الحالة:</strong> {selectedTask.completed ? 'مكتملة' : 'قيد التنفيذ'}</p>
+                        {selectedTask.description && <p className="pt-2 border-t border-border-light dark:border-border-dark"><strong className="font-semibold">الوصف:</strong> {selectedTask.description}</p>}
+                    </div>
+                )}
+            </Modal>
+            <Modal isOpen={isAlertDetailModalOpen} onClose={() => setIsAlertDetailModalOpen(false)} title="تفاصيل التنبيه">
+                {selectedAlert && (
+                     <div className="space-y-4">
+                        <p><strong className="font-semibold">التنبيه:</strong> {selectedAlert.title}</p>
+                        <p><strong className="font-semibold">الوقت:</strong> {selectedAlert.time}</p>
+                        {selectedAlert.description && <p className="pt-2 border-t border-border-light dark:border-border-dark"><strong className="font-semibold">الوصف:</strong> {selectedAlert.description}</p>}
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 };
