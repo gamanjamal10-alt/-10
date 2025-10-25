@@ -1,48 +1,51 @@
-import React from 'react';
 
-const navItems = [
-    { name: 'لوحة القيادة', icon: 'dashboard' },
-    { name: 'القطيع', icon: 'pets' },
-    { name: 'المهام', icon: 'task_alt' },
-    { name: 'التقارير', icon: 'analytics' },
-];
+import React from 'react';
+import type { Page } from '../types';
 
 interface NavItemProps {
-    name: string;
+    label: string;
     icon: string;
     isActive: boolean;
     onClick: () => void;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ name, icon, isActive, onClick }) => {
-    const activeClass = isActive ? 'text-primary' : 'text-text-light-secondary dark:text-dark-secondary';
-    return (
-        <a href="#" onClick={(e) => { e.preventDefault(); onClick(); }} className="flex flex-col items-center gap-1 w-20 transition-colors group">
-            <div className={`relative flex items-center justify-center h-8 w-16 rounded-full transition-colors ${isActive ? 'bg-primary/10' : ''}`}>
-                 <span className={`material-symbols-outlined transition-colors ${activeClass}`}>{icon}</span>
-            </div>
-            <span className={`text-xs font-medium transition-colors ${activeClass}`}>{name}</span>
-        </a>
-    );
-};
+const NavItem: React.FC<NavItemProps> = ({ label, icon, isActive, onClick }) => (
+    <button
+        onClick={onClick}
+        className={`flex flex-col items-center justify-center w-full pt-2 pb-1 transition-colors duration-200 ${
+            isActive ? 'text-primary' : 'text-text-light-secondary dark:text-dark-secondary'
+        }`}
+    >
+        <span className="material-symbols-outlined">{icon}</span>
+        <span className="text-xs font-medium">{label}</span>
+    </button>
+);
 
 interface BottomNavBarProps {
-    activeItem: string;
-    onNavigate: (itemName: string) => void;
+    activePage: Page;
+    onNavigate: (page: Page) => void;
 }
 
-export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeItem, onNavigate }) => {
+export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activePage, onNavigate }) => {
+    const navItems: { page: Page; label: string; icon: string }[] = [
+        { page: 'dashboard', label: 'الرئيسية', icon: 'dashboard' },
+        { page: 'herd', label: 'القطيع', icon: 'pets' },
+        { page: 'tasks', label: 'المهام', icon: 'task_alt' },
+        { page: 'reports', label: 'التقارير', icon: 'analytics' },
+        { page: 'shepherds', label: 'الرعاة', icon: 'group' },
+    ];
+
     return (
-        <div className="fixed bottom-0 left-0 right-0 h-20 bg-card-light/80 dark:bg-card-dark/80 backdrop-blur-sm border-t border-border-light dark:border-border-dark flex justify-around items-center z-30">
+        <nav className="fixed bottom-0 left-0 right-0 h-16 bg-card-light dark:bg-card-dark border-t border-border-light dark:border-border-dark flex items-center justify-around z-30">
             {navItems.map(item => (
                 <NavItem
-                    key={item.name}
-                    name={item.name}
+                    key={item.page}
+                    label={item.label}
                     icon={item.icon}
-                    isActive={activeItem === item.name}
-                    onClick={() => onNavigate(item.name)}
+                    isActive={activePage === item.page}
+                    onClick={() => onNavigate(item.page)}
                 />
             ))}
-        </div>
+        </nav>
     );
 };
